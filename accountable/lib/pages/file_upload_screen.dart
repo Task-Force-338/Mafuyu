@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:accountable/services/ocr_service.dart';
+import 'dart:io';
 
 class FileUploadScreen extends StatefulWidget {
   const FileUploadScreen({super.key});
@@ -10,6 +12,68 @@ class FileUploadScreen extends StatefulWidget {
 
 class _FileUploadScreenState extends State<FileUploadScreen> {
   bool isAutomaticUpload = false;
+  final OcrService _ocrService = OcrService();
+  String? _selectedFilePath;
+  Map<String, String?>? _ocrResult;
+
+  Future<void> _pickAndProcessFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        String filePath = result.files.single.path!;
+        setState(() {
+          _selectedFilePath = filePath;
+          _ocrResult = null;
+        });
+
+        print("Selected file: $filePath");
+
+        Map<String, String?> ocrData =
+            await _ocrService.extractSlipData(filePath);
+
+        setState(() {
+          _ocrResult = ocrData;
+        });
+
+        if (_ocrResult != null) {
+          print(
+              "OCR Result: Recipient: ${_ocrResult!['recipient']}, Amount: ${_ocrResult!['amount']}");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    'Recipient: ${_ocrResult!['recipient'] ?? 'Not found'}, Amount: ${_ocrResult!['amount'] ?? 'Not found'}'),
+              ),
+            );
+          }
+        } else {
+          print("OCR failed or returned null.");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Failed to extract data from slip.')),
+            );
+          }
+        }
+      } else {
+        print("File picking cancelled.");
+      }
+    } catch (e) {
+      print("Error during file picking or OCR: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+      setState(() {
+        _selectedFilePath = null;
+        _ocrResult = null;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +81,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
       backgroundColor: Colors.blueGrey.shade900,
       appBar: AppBar(
         backgroundColor: Colors.blue.shade200,
+        title: const Text('Upload E-Slip'),
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -57,7 +123,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: _pickAndProcessFile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey.shade600,
                 padding:
@@ -71,9 +137,24 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            const SizedBox(height: 20),
+            if (_selectedFilePath != null) ...[
+              const SizedBox(height: 20),
+              Text(
+                  'Selected: ${_selectedFilePath!.split(Platform.pathSeparator).last}',
+                  style: const TextStyle(color: Colors.white70)),
+            ],
+            if (_ocrResult != null) ...[
+              const SizedBox(height: 10),
+              Text('Recipient: ${_ocrResult!['recipient'] ?? 'N/A'}',
+                  style: const TextStyle(color: Colors.white)),
+              Text('Amount: ${_ocrResult!['amount'] ?? 'N/A'}',
+                  style: const TextStyle(color: Colors.white)),
+            ],
+            const Spacer(),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                print("Manual transaction button pressed");
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey.shade500,
                 padding:
@@ -87,6 +168,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
