@@ -1,10 +1,44 @@
+import 'package:accountable/backend/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String detailsPath;
 
   const HomePage({super.key, required this.detailsPath});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  DateTime selectedDate = DateTime.now();
+  String getFormattedDate(DateTime date) {
+    const List<String> months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ];
+    return '${months[date.month - 1]} ${date.day}';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize any data or state here if needed
+    //context.read<AppState>().loadAll(); // load from DB
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -15,17 +49,37 @@ class HomePage extends StatelessWidget {
             IconButton(
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
-                // Navigate to previous date
+                setState(() {
+                  selectedDate = selectedDate.subtract(const Duration(days: 1));
+                });
               },
             ),
-            const Text(
-              'Dec 24',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: () async {
+                final DateTime? picked = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
+                );
+                if (picked != null && picked != selectedDate) {
+                  setState(() {
+                    selectedDate = picked;
+                  });
+                }
+              },
+              child: Text(
+                getFormattedDate(selectedDate),
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
             IconButton(
               icon: const Icon(Icons.arrow_forward_ios),
               onPressed: () {
-                // Navigate to next date
+                setState(() {
+                  selectedDate = selectedDate.add(const Duration(days: 1));
+                });
               },
             ),
           ],
@@ -105,7 +159,6 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      
     );
   }
 
@@ -165,9 +218,9 @@ class HomePage extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-              icon: Icon(icon),
-              onPressed: () => context.go(detailsPath),
-            ),
+            icon: Icon(icon),
+            onPressed: () => context.go(widget.detailsPath),
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -180,7 +233,8 @@ class HomePage extends StatelessWidget {
               ],
             ),
           ),
-          Text(amount, style: const TextStyle(fontSize: 16, color: Colors.white)),
+          Text(amount,
+              style: const TextStyle(fontSize: 16, color: Colors.white)),
         ],
       ),
     );

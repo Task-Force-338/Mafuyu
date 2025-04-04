@@ -1,3 +1,4 @@
+
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart'; // PROVIDER REQUIRES MATERIAL???? WHY????
 import 'package:provider/provider.dart';
@@ -304,21 +305,20 @@ class AppState extends ChangeNotifier {
   List<DailyTransList> dailyTransLists = [];
   List<ReceiptFile> receipts = [];
 
+
+
   void toggleAutomaticUpload() {
     isAutomaticUpload = !isAutomaticUpload;
     notifyListeners();
   }
 
-  void toggleDarkMode() {
-    isDarkMode = !isDarkMode; // do we have dark mode anyways
-    notifyListeners();
-  }
+ 
 
   void readReceipt(ReceiptFile receipt) {
     // read the receipt and add the transactions to the transList
     receipt.OCRBS();
     notifyListeners();
-  }
+    }
 
   void getInsights() {
     transList.generateInsights();

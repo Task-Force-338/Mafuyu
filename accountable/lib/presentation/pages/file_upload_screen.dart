@@ -1,3 +1,5 @@
+import 'package:accountable/backend/app_state.dart';
+import 'package:accountable/presentation/pages/addTransaction.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 
@@ -57,7 +59,31 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             ),
             const SizedBox(height: 30),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                FilePickerResult? result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['jpg', 'png', 'jpeg', 'pdf'],
+                );
+
+                if (result != null && result.files.isNotEmpty) {
+                  final pickedFile = result.files.first;
+
+                  final receipt = ReceiptFile(
+                    name: pickedFile.name,
+                    path: pickedFile.path ?? '',
+                  );
+
+                  
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Selected file: ${receipt.name}")),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("No file selected.")),
+                  );
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey.shade600,
                 padding:
@@ -73,11 +99,14 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             ),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AddTransaction()));
+              },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade500,
+                backgroundColor: Colors.blueGrey.shade600,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

@@ -1,29 +1,24 @@
-import 'package:accountable/presentation/pages/file_upload_screen.dart';
+import 'package:accountable/backend/app_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:go_router/go_router.dart';
+
 import 'package:accountable/presentation/pages/home_page.dart';
+import 'package:accountable/presentation/pages/file_upload_screen.dart';
 import 'package:accountable/presentation/pages/summary_screen.dart';
 import 'package:accountable/presentation/pages/transaction_details_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-// ignore: depend_on_referenced_packages
-import 'package:flutter_web_plugins/url_strategy.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'firebase_options.dart';
+import 'package:provider/provider.dart';
 
-// private navigators
+// --- Global Navigator Keys ---
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorHomePageKey =
-    GlobalKey<NavigatorState>(debugLabel: 'HomePage');
-final _shellNavigatorNewPageKey =
-    GlobalKey<NavigatorState>(debugLabel: 'NewPage');
-final _shellNavigatorSummaryPageKey =
-    GlobalKey<NavigatorState>(debugLabel: 'SummaryPage');
+final _shellNavigatorHomePageKey = GlobalKey<NavigatorState>(debugLabel: 'HomePage');
+final _shellNavigatorNewPageKey = GlobalKey<NavigatorState>(debugLabel: 'NewPage');
+final _shellNavigatorSummaryPageKey = GlobalKey<NavigatorState>(debugLabel: 'SummaryPage');
 
-final goRouter = GoRouter(
+// --- App Router Setup ---
+final GoRouter goRouter = GoRouter(
   initialLocation: '/HomePage',
-  // * Passing a navigatorKey causes an issue on hot reload:
-  // * https://github.com/flutter/flutter/issues/113757#issuecomment-1518421380
-  // * However it's still necessary otherwise the navigator pops back to
-  // * root on hot reload
   navigatorKey: _rootNavigatorKey,
   debugLogDiagnostics: true,
   routes: [
@@ -32,6 +27,7 @@ final goRouter = GoRouter(
         return ScaffoldWithNestedNavigation(navigationShell: navigationShell);
       },
       branches: [
+        // --- Home Page Branch ---
         StatefulShellBranch(
           navigatorKey: _shellNavigatorHomePageKey,
           routes: [
@@ -45,14 +41,12 @@ final goRouter = GoRouter(
                   path: 'transaction_details',
                   builder: (context, state) => const TransactionDetailScreen(),
                 ),
-                // GoRoute(
-                //   path: 'sth',
-                //   builder: (context, state) => const TransactionDetailScreen(),
-                // ),
               ],
             ),
           ],
         ),
+
+        // --- Upload Page Branch ---
         StatefulShellBranch(
           navigatorKey: _shellNavigatorNewPageKey,
           routes: [
@@ -61,15 +55,11 @@ final goRouter = GoRouter(
               pageBuilder: (context, state) => const NoTransitionPage(
                 child: FileUploadScreen(),
               ),
-              routes: const [
-                // GoRoute(
-                //   path: 'details',
-                //   builder: (context, state) => const DetailsScreen(label: 'B'),
-                // ),
-              ],
             ),
           ],
         ),
+
+        // --- Summary Page Branch ---
         StatefulShellBranch(
           navigatorKey: _shellNavigatorSummaryPageKey,
           routes: [
@@ -78,12 +68,6 @@ final goRouter = GoRouter(
               pageBuilder: (context, state) => const NoTransitionPage(
                 child: BudgetSummaryScreen(),
               ),
-              routes: [
-                // GoRoute(
-                //   path: 'details',
-                //   builder: (context, state) => const DetailsScreen(label: 'B'),
-                // ),
-              ],
             ),
           ],
         ),
@@ -92,12 +76,25 @@ final goRouter = GoRouter(
   ],
 );
 
+
 void main() {
-  // turn off the # in the URLs on the web
-  usePathUrlStrategy();
-  runApp(const MyApp());
+  usePathUrlStrategy(); // clean URLs on web
+
+  runApp(
+    MultiProvider(
+      providers: [
+       
+        ChangeNotifierProvider(
+          create: (context) => AppState(),
+        ),
+      ],
+      child: const MyApp(), // still the same widget
+    ),
+  );
 }
 
+
+// --- App Entry ---
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -111,39 +108,33 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Stateful navigation based on:
-// https://github.com/flutter/packages/blob/main/packages/go_router/example/lib/stateful_shell_route.dart
+// --- Nested Navigation Scaffold ---
 class ScaffoldWithNestedNavigation extends StatelessWidget {
   const ScaffoldWithNestedNavigation({
     Key? key,
     required this.navigationShell,
-  }) : super(
-            key: key ?? const ValueKey<String>('ScaffoldWithNestedNavigation'));
+  }) : super(key: key ?? const ValueKey('ScaffoldWithNestedNavigation'));
+
   final StatefulNavigationShell navigationShell;
 
   void _goBranch(int index) {
     navigationShell.goBranch(
       index,
-      // A common pattern when using bottom navigation bars is to support
-      // navigating to the initial location when tapping the item that is
-      // already active. This example demonstrates how to support this behavior,
-      // using the initialLocation parameter of goBranch.
       initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      return ScaffoldWithNavigationBar(
-        body: navigationShell,
-        selectedIndex: navigationShell.currentIndex,
-        onDestinationSelected: _goBranch,
-      );
-    });
+    return ScaffoldWithNavigationBar(
+      body: navigationShell,
+      selectedIndex: navigationShell.currentIndex,
+      onDestinationSelected: _goBranch,
+    );
   }
 }
 
+// --- Bottom Navigation Scaffold ---
 class ScaffoldWithNavigationBar extends StatelessWidget {
   const ScaffoldWithNavigationBar({
     super.key,
@@ -151,6 +142,7 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
     required this.selectedIndex,
     required this.onDestinationSelected,
   });
+
   final Widget body;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -161,12 +153,12 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
       body: body,
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
         destinations: const [
           NavigationDestination(label: 'Home', icon: Icon(Icons.home)),
           NavigationDestination(label: 'New', icon: Icon(Icons.add)),
           NavigationDestination(label: 'Summary', icon: Icon(Icons.add_chart)),
         ],
-        onDestinationSelected: onDestinationSelected,
       ),
     );
   }
