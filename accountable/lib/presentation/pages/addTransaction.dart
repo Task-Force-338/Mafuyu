@@ -16,11 +16,13 @@ class _AddTransactionState extends State<AddTransaction> {
   String? selectedCategory;
   DateTime? selectedDate;
   final List<String> categories = [
-    'Food',
-    'Transport',
-    'Shopping',
-    'Health',
-    'Other'
+    'food',
+    'personal',
+    'utility',
+    'transportation',
+    'health',
+    'leisure',
+    'other'
   ];
 
   @override
@@ -200,8 +202,11 @@ class _AddTransactionState extends State<AddTransaction> {
                 onPressed: () async {
                   final amount = double.tryParse(amountController.text);
                   final notes = notesController.text;
+                  debugPrint("selectedCategory: $selectedCategory");
                   final typeStr = selectedCategory?.toLowerCase() ?? "other";
+                  debugPrint("transactionType: $typeStr");
                   final transType = stringToTransType(typeStr);
+                  debugPrint("transactionType: $transType");
                   final date = selectedDate ?? DateTime.now();
 
                   if (amount == null || notes.isEmpty) {
@@ -217,6 +222,7 @@ class _AddTransactionState extends State<AddTransaction> {
                     transactionDate: date,
                     amount: amount,
                     transType: transType,
+                    
                   );
 
                   trans.saveToDB(); // inserts into SQLite

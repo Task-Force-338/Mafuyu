@@ -14,6 +14,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   DateTime selectedDate = DateTime.now();
+  @override
+  void initState() {
+    super.initState();
+    final appState = AppState();
+    appState.transList.getTransactionsFromDB();
+  }
+
+  IconData _getIconForType(TransactionType type) {
+    switch (type) {
+      case TransactionType.food:
+        return Icons.restaurant;
+      case TransactionType.personal:
+        return Icons.person;
+      case TransactionType.utility:
+        return Icons.lightbulb;
+      case TransactionType.transportation:
+        return Icons.directions_bus;
+      case TransactionType.health:
+        return Icons.local_hospital;
+      case TransactionType.leisure:
+        return Icons.movie;
+      case TransactionType.other:
+      default:
+        return Icons.category;
+    }
+  }
+
   String getFormattedDate(DateTime date) {
     const List<String> months = [
       'Jan',
@@ -32,135 +59,147 @@ class _HomePageState extends State<HomePage> {
     return '${months[date.month - 1]} ${date.day}';
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Initialize any data or state here if needed
-    //context.read<AppState>().loadAll(); // load from DB
+  String getMonthName(int month) {
+  const List<String> months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return months[month - 1];
+}
+
+  List<DailyTransList> getAllDaysInMonth(AppState appState, DateTime date) {
+  final year = date.year;
+  final month = date.month;
+  final lastDay = DateUtils.getDaysInMonth(year, month);
+
+  List<DailyTransList> allDays = [];
+
+  for (int day = 1; day <= lastDay; day++) {
+    final dateForDay = DateTime(year, month, day);
+    final dailyList = appState.getDailyTransList(dateForDay);
+    if (dailyList.transactions.isNotEmpty) {
+      allDays.add(dailyList);
+    }
   }
 
+  return allDays;
+}
+
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
-              onPressed: () {
-                setState(() {
-                  selectedDate = selectedDate.subtract(const Duration(days: 1));
-                });
-              },
-            ),
-            GestureDetector(
-              onTap: () async {
-                final DateTime? picked = await showDatePicker(
-                  context: context,
-                  initialDate: selectedDate,
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2101),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              setState(() {
+                selectedDate = DateTime(
+                  selectedDate.year,
+                  selectedDate.month - 1,
                 );
-                if (picked != null && picked != selectedDate) {
-                  setState(() {
-                    selectedDate = picked;
-                  });
-                }
-              },
-              child: Text(
-                getFormattedDate(selectedDate),
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
-              onPressed: () {
-                setState(() {
-                  selectedDate = selectedDate.add(const Duration(days: 1));
-                });
-              },
-            ),
-          ],
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue[900],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  '16,938.81',
-                  style: TextStyle(fontSize: 24, color: Colors.white),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              const SizedBox(height: 16),
-              _buildDayExpense(
-                day: 'Tue 17',
-                totalExpense: '90,299',
-                expenses: [
-                  _buildExpenseItem(
-                    icon: Icons.directions_bus,
-                    title: 'Transport',
-                    subtitle: 'Grab',
-                    amount: '100',
-                    context: context,
-                  ),
-                  _buildExpenseItem(
-                    icon: Icons.directions_bus,
-                    title: 'Transport',
-                    subtitle: 'Bolt',
-                    amount: '100',
-                    context: context,
-                  ),
-                  _buildExpenseItem(
-                    icon: Icons.restaurant,
-                    title: 'Food',
-                    subtitle: 'Robinhood',
-                    amount: '99',
-                    context: context,
-                  ),
-                  _buildExpenseItem(
-                    icon: Icons.school,
-                    title: 'Education',
-                    subtitle:
-                        'King Mongkut\'s Institute of Technology Ladkrabang',
-                    amount: '90,000',
-                    context: context,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              _buildDayExpense(
-                day: 'Mon 16',
-                totalExpense: '320',
-                expenses: [
-                  _buildExpenseItem(
-                    icon: Icons.category,
-                    title: 'Other',
-                    subtitle: '...',
-                    amount: '320',
-                    context: context,
-                  ),
-                ],
-              ),
-            ],
+              });
+            },
           ),
-        ),
+          GestureDetector(
+            onTap: () async {
+              final DateTime? picked = await showDatePicker(
+                context: context,
+                initialDate: selectedDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime(2101),
+              );
+              if (picked != null && picked != selectedDate) {
+                setState(() {
+                  selectedDate = picked;
+                });
+              }
+            },
+            child: Text(
+              '${getMonthName(selectedDate.month)} ${selectedDate.year}',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward_ios),
+            onPressed: () {
+              setState(() {
+                selectedDate = DateTime(
+                  selectedDate.year,
+                  selectedDate.month + 1,
+                );
+              });
+            },
+          ),
+        ],
       ),
-    );
-  }
+      centerTitle: true,
+    ),
+    body: Consumer<AppState>(
+      builder: (context, appState, child) {
+        final allDailyTrans = getAllDaysInMonth(appState, selectedDate);
+        debugPrint("DailyTransList for month: $allDailyTrans");
+
+        // Monthly total
+        final totalExpense = allDailyTrans
+            .expand((day) => day.transactions)
+            .fold(0.0, (sum, t) => sum + t.amount)
+            .toStringAsFixed(2);
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[900],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Monthly Total: $totalExpense',
+                    style: const TextStyle(fontSize: 24, color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ...allDailyTrans.map((dailyList) {
+                  final dayTotal = dailyList.transactions
+                      .fold(0.0, (sum, t) => sum + t.amount)
+                      .toStringAsFixed(2);
+
+                  final expenseWidgets = dailyList.transactions.map((trans) {
+                    return _buildExpenseItem(
+                      icon: _getIconForType(trans.transType),
+                      title: transTypeToString(trans.transType),
+                      subtitle: trans.transName,
+                      amount: trans.amount.toStringAsFixed(2),
+                      context: context,
+                    );
+                  }).toList();
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _buildDayExpense(
+                      day: getFormattedDate(dailyList.getDate()),
+                      totalExpense: dayTotal,
+                      expenses: expenseWidgets,
+                    ),
+                  );
+                }).toList(),
+              ],
+            ),
+          ),
+        );
+      },
+    ),
+  );
+}
 
   Widget _buildDayExpense({
     required String day,
@@ -209,10 +248,11 @@ class _HomePageState extends State<HomePage> {
     required BuildContext context,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      
+      margin: const EdgeInsets.fromLTRB(40, 0, 0, 20),
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 25),
       decoration: BoxDecoration(
-        color: Colors.blue[700],
+        color: Colors.blue[500],
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
