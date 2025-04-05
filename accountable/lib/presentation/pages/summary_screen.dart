@@ -13,24 +13,15 @@ class BudgetSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      appBar: AppBar(
+        backgroundColor: Colors.blue[200],
+        title: const Text('Budget Summary'),
+        
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              color: Colors.blue[200],
-              padding: const EdgeInsets.all(16),
-              child: const Row(
-                children: [
-                  Icon(Icons.arrow_back),
-                  SizedBox(width: 10),
-                  Text(
-                    'Dec 24',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
+            
             Expanded(
               child: Container(
                 color: Colors.white,

@@ -2,7 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart'; // PROVIDER REQUIRES MATERIAL???? WHY????
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart'; // for the firebase stuff
-import 'firebase_options.dart'; // for the firebase stuff
+// import 'firebase_options.dart'; // for the firebase stuff
 
 FirebaseFirestore firebaseDB = FirebaseFirestore.instance;
 
@@ -176,7 +176,8 @@ class TransList {
         transactionDate: DateTime.parse(
             dbTrans['transactionDate']), // PLEASE SAVE IT AS ISO 8601
         amount: dbTrans['amount'],
-        transType: stringToTransType(dbTrans['transType'].toLowerCase()),
+        transType:
+            stringToTransType(dbTrans['transType'].toString().toLowerCase()),
       ));
     }
   }
@@ -231,24 +232,20 @@ class Trans {
     required this.transName,
     required this.transactionDate,
     required this.amount,
-  })  : assert(transName != null),
-        assert(transactionDate != null),
-        assert(amount != null);
+    required this.transType,
+  });
 
   Trans.withType({
     required this.transName,
     required this.transactionDate,
     required this.amount,
     required this.transType,
-  })  : assert(transName != null),
-        assert(transactionDate != null),
-        assert(amount != null),
-        assert(transType != null);
+  });
 
   @override
   String toString() {
     // this is stupid. who would want to print a transaction object, let alone log it?
-    return 'Transaction{transName: $transName, transactionDate: $transactionDate, amount: $amount}';
+    return 'Transaction{transName: $transName, transactionDate: $transactionDate, amount: $amount, transType: $transType}';
   }
 
   void generateCategory() async {
@@ -285,13 +282,15 @@ class Trans {
 
   void saveToDB() async {
     // save the transaction to the local database
+    final value = transTypeToString(transType).toLowerCase();
+    debugPrint("transType: $value");
     final db = LocalDB();
     await db.insertTransaction({
       'transName': transName,
       'transactionDate': transactionDate.toIso8601String(), // HELL YEAH
       'amount':
           amount, // hopefully it saves as number. if breaks, make it so that it saves as REAL
-      'transType': transTypeToString(transType),
+      'transType':value,
     });
   }
 }
@@ -306,11 +305,6 @@ class AppState extends ChangeNotifier {
 
   void toggleAutomaticUpload() {
     isAutomaticUpload = !isAutomaticUpload;
-    notifyListeners();
-  }
-
-  void toggleDarkMode() {
-    isDarkMode = !isDarkMode; // do we have dark mode anyways
     notifyListeners();
   }
 

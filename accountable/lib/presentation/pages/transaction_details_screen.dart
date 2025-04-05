@@ -1,3 +1,4 @@
+import 'package:accountable/presentation/pages/addTransaction.dart';
 import 'package:flutter/material.dart';
 
 class TransactionDetailScreen extends StatelessWidget {
@@ -42,9 +43,9 @@ class TransactionDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            _buildInfoTile(Icons.directions_bus, 'Transport'),
+            _buildInfoTile(Icons.directions_bus, 'Transport', context),
             const SizedBox(height: 10),
-            _buildInfoTile(Icons.edit, 'blahblah'),
+            _buildInfoTile(Icons.edit, 'blahblah', context),
             const SizedBox(height: 20),
             _buildSlipInfo(),
             const Spacer(),
@@ -63,7 +64,7 @@ class TransactionDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String text) {
+  Widget _buildInfoTile(IconData icon, String text, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -75,6 +76,21 @@ class TransactionDetailScreen extends StatelessWidget {
           Icon(icon, color: Colors.white),
           const SizedBox(width: 8),
           Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
+          
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.edit, color: Colors.white),
+              onPressed: () {
+                // go to add transaction page
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => const AddTransaction())
+                  
+                  );
+
+              },
+            ),
+          )
         ],
       ),
     );
