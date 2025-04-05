@@ -12,9 +12,12 @@ import 'package:provider/provider.dart';
 
 // --- Global Navigator Keys ---
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorHomePageKey = GlobalKey<NavigatorState>(debugLabel: 'HomePage');
-final _shellNavigatorNewPageKey = GlobalKey<NavigatorState>(debugLabel: 'NewPage');
-final _shellNavigatorSummaryPageKey = GlobalKey<NavigatorState>(debugLabel: 'SummaryPage');
+final _shellNavigatorHomePageKey =
+    GlobalKey<NavigatorState>(debugLabel: 'HomePage');
+final _shellNavigatorNewPageKey =
+    GlobalKey<NavigatorState>(debugLabel: 'NewPage');
+final _shellNavigatorSummaryPageKey =
+    GlobalKey<NavigatorState>(debugLabel: 'SummaryPage');
 
 // --- App Router Setup ---
 final GoRouter goRouter = GoRouter(
@@ -76,14 +79,15 @@ final GoRouter goRouter = GoRouter(
   ],
 );
 
-
 void main() {
   usePathUrlStrategy(); // clean URLs on web
 
   runApp(
     MultiProvider(
       providers: [
-       
+        ChangeNotifierProvider(
+          create: (context) => TransList(),
+        ),
         ChangeNotifierProvider(
           create: (context) => AppState(),
         ),
@@ -92,7 +96,6 @@ void main() {
     ),
   );
 }
-
 
 // --- App Entry ---
 class MyApp extends StatelessWidget {

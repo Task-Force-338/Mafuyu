@@ -118,7 +118,7 @@ TransactionType stringToTransType(String type) {
   }
 }
 
-class TransList {
+class TransList extends ChangeNotifier {
   // holds the current session's transactions. so that sqlite doesn't get called every time we need to access the transactions
   // we still have to call sqlite when we need to save the transactions, though
   // thats why this CANNOT send the transactions to the remote database. it's just a temporary storage.
@@ -135,10 +135,12 @@ class TransList {
 
   void addTransaction(Trans transaction) {
     transactions.add(transaction);
+    notifyListeners();
   }
 
   void removeTransaction(Trans transaction) {
     transactions.remove(transaction);
+    notifyListeners();
   }
 
   Map<TransactionType, double> generateInsights() {
@@ -163,6 +165,7 @@ class TransList {
   void scorchedEarth() {
     // deletes all transactions. maybe to fetch them again?
     transactions.clear();
+    notifyListeners();
   }
 
   void getTransactionsFromDB() async {
@@ -170,6 +173,8 @@ class TransList {
     final db = LocalDB();
     List<Map<String, dynamic>> dbTransactions = await db.getTransactions();
 
+    transactions
+        .clear(); // Clear before loading to avoid duplicates if called multiple times
     for (Map<String, dynamic> dbTrans in dbTransactions) {
       transactions.add(Trans.withType(
         transName: dbTrans['transName'],
@@ -180,6 +185,7 @@ class TransList {
             stringToTransType(dbTrans['transType'].toString().toLowerCase()),
       ));
     }
+    notifyListeners();
   }
 }
 
@@ -290,7 +296,7 @@ class Trans {
       'transactionDate': transactionDate.toIso8601String(), // HELL YEAH
       'amount':
           amount, // hopefully it saves as number. if breaks, make it so that it saves as REAL
-      'transType':value,
+      'transType': value,
     });
   }
 }
