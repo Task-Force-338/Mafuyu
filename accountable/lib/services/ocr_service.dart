@@ -2,6 +2,7 @@ import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'dart:io'; // Required for File operations if needed, though path is usually sufficient
 import 'package:image/image.dart' as img; // Add this for image processing
 import 'dart:typed_data'; // Add this for Uint8List
+import 'package:pdf_text/pdf_text.dart'; // Import the pdf_text package
 
 class OcrService {
   /// Extracts text from an image file using Tesseract OCR.
@@ -41,6 +42,22 @@ class OcrService {
     }
   }
 
+  /// Extracts text from a PDF file.
+  ///
+  /// [pdfPath] The path to the PDF file.
+  /// Returns the extracted text as a single string.
+  Future<String> _extractTextFromPdf(String pdfPath) async {
+    try {
+      PDFDoc doc = await PDFDoc.fromPath(pdfPath);
+      String text = await doc.text;
+      return text;
+    } catch (e) {
+      print("Error during PDF text extraction: $e");
+      // Consider more robust error handling/logging
+      return "";
+    }
+  }
+
   /// Preprocesses the image to improve OCR accuracy
   ///
   /// [imagePath] The path to the original image
@@ -75,7 +92,8 @@ class OcrService {
 
       // --- Save the processed image ---
       String tempPath = imagePath.replaceAll(
-          RegExp(r'(\.[^\.]+)$'), // Match file extension
+          RegExp(
+              r'(\\.[^\\.]+)$'), // Match file extension (fixed for Windows paths)
           '_processed\$1');
 
       // Save as PNG for potentially better quality after thresholding (lossless)
@@ -103,7 +121,7 @@ class OcrService {
         .replaceAll(' ไป ', 'ไป');
 
     List<String> lines = normalizedOcrText
-        .split('\n')
+        .split('\\n')
         .where((line) => line.trim().isNotEmpty)
         .toList();
 
@@ -127,7 +145,7 @@ class OcrService {
           recipientKeywords.hasMatch(line)) {
         // Try to extract recipient from the SAME line first
         List<String> parts = line
-            .split(RegExp(r'(ไปยัง|ไป|ถึง|TO)\s*|@|~', caseSensitive: false));
+            .split(RegExp(r'(ไปยัง|ไป|ถึง|TO)\\s*|@|~', caseSensitive: false));
         if (parts.length > 1 &&
             parts[1].trim().isNotEmpty &&
             _isPlausibleName(parts[1].trim())) {
@@ -207,7 +225,7 @@ class OcrService {
 
     // Extract Amount
     RegExp amountRegex =
-        RegExp(r'(\d{1,3}(?:,\d{3})*\.\d{2})\b'); // More specific regex
+        RegExp(r'(\\d{1,3}(?:,\\d{3})*\\.\\d{2})\\b'); // More specific regex
     if (amountLineIndex != null) {
       // Found line with amount keyword, extract amount from it
       Match? match = amountRegex.firstMatch(lines[amountLineIndex]);
@@ -234,7 +252,7 @@ class OcrService {
       // Remove only standalone account-like patterns
       recipient = recipient
           .replaceAll(
-              RegExp(r'\b(xxx-xxx\d{3,}(-\d+)?|xxx-x-x\d{4}-x)\b',
+              RegExp(r'\\b(xxx-xxx\\d{3,}(-\\d+)?|xxx-x-x\\d{4}-x)\\b',
                   caseSensitive: false),
               '')
           .trim();
@@ -242,10 +260,11 @@ class OcrService {
       // Remove unwanted leading/trailing symbols (more compatible regex)
       // Removes leading chars that are not word chars, @, or ~
       // Removes trailing chars that are not word chars
-      recipient = recipient.replaceAll(RegExp(r'^[^\w@~]+|[^\w]+$'), '').trim();
+      recipient =
+          recipient.replaceAll(RegExp(r'^[^\\w@~]+|[^\\w]+$'), '').trim();
 
       // Replace multiple spaces with a single space
-      recipient = recipient.replaceAll(RegExp(r'\s+'), ' ');
+      recipient = recipient.replaceAll(RegExp(r'\\s+'), ' ');
     }
 
     print("--- OCR Text ---");
@@ -266,7 +285,7 @@ class OcrService {
     if (line.isEmpty) return false;
 
     // Reject lines that are just IDs or numeric content
-    if (RegExp(r'^[\d\s-]+$').hasMatch(line))
+    if (RegExp(r'^[\\d\\s-]+$').hasMatch(line))
       return false; // Pure digits/spaces/hyphens
 
     // Allow lines with shop-specific patterns even if they contain digits
@@ -278,7 +297,7 @@ class OcrService {
     }
 
     // Check if it contains at least one Thai character or letter
-    bool hasThai = RegExp(r'[\u0E00-\u0E7F]').hasMatch(line);
+    bool hasThai = RegExp(r'[\\u0E00-\\u0E7F]').hasMatch(line);
     bool hasLetter = RegExp(r'[a-zA-Z]').hasMatch(line);
 
     if (!hasThai && !hasLetter) return false;
@@ -288,19 +307,29 @@ class OcrService {
       return false;
 
     // Check if it's a masked account number (e.g., xxx-xxx123-4)
-    if (RegExp(r'^x{3}-x{3}\d{3}-\d$').hasMatch(line)) return false;
+    if (RegExp(r'^x{3}-x{3}\\d{3}-\\d$').hasMatch(line)) return false;
 
     return true; // Seems plausible
   }
 
-  /// Extracts recipient and amount from a banking e-slip image.
+  /// Extracts recipient and amount from a banking e-slip (image or PDF).
   ///
-  /// [imagePath] The path to the e-slip image file.
+  /// [filePath] The path to the e-slip image or PDF file.
   /// Returns a Map containing the 'recipient' and 'amount'. Returns null values if extraction fails.
-  Future<Map<String, String?>> extractSlipData(String imagePath) async {
-    String ocrText = await _extractTextFromImage(imagePath);
+  Future<Map<String, String?>> extractSlipData(String filePath) async {
+    String ocrText = "";
+    if (filePath.toLowerCase().endsWith('.pdf')) {
+      ocrText = await _extractTextFromPdf(filePath);
+    } else {
+      // Assuming image otherwise, could add more robust type checking
+      ocrText = await _extractTextFromImage(filePath);
+    }
+
     if (ocrText.isEmpty) {
-      return {'recipient': null, 'amount': null}; // Return nulls if OCR failed
+      return {
+        'recipient': null,
+        'amount': null
+      }; // Return nulls if extraction failed
     }
     return _parseSlipData(ocrText);
   }

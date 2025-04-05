@@ -1,11 +1,45 @@
+import 'package:accountable/backend/app_state.dart';
 import 'package:accountable/presentation/pages/addTransaction.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
 class TransactionDetailScreen extends StatelessWidget {
-  const TransactionDetailScreen({super.key});
+  final Trans transaction; // Add transaction field
+
+  const TransactionDetailScreen(
+      {super.key, required this.transaction}); // Update constructor
+
+  // Helper function to get icon based on transaction type
+  IconData _getIconForType(TransactionType type) {
+    switch (type) {
+      case TransactionType.food:
+        return Icons.restaurant;
+      case TransactionType.personal:
+        return Icons.person;
+      case TransactionType.utility:
+        return Icons.lightbulb;
+      case TransactionType.transportation:
+        return Icons.directions_bus;
+      case TransactionType.health:
+        return Icons.local_hospital;
+      case TransactionType.leisure:
+        return Icons.movie;
+      case TransactionType.other:
+      default:
+        return Icons.category;
+    }
+  }
+
+  // Helper function to get string representation of transaction type
+  String _getStringForType(TransactionType type) {
+    return transTypeToString(type); // Use existing helper
+  }
 
   @override
   Widget build(BuildContext context) {
+    final formattedDate = DateFormat('EEE dd MMM yy')
+        .format(transaction.transactionDate); // Format the date
+
     return Scaffold(
       backgroundColor: Colors.blueGrey.shade900,
       appBar: AppBar(
@@ -14,17 +48,17 @@ class TransactionDetailScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title:
-            const Text('Transaction Detail', style: TextStyle(color: Colors.white)),
+        title: const Text('Transaction Detail',
+            style: TextStyle(color: Colors.white)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Tue 24 Dec 24',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+            Text(
+              formattedDate, // Use formatted date
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             const SizedBox(height: 10),
             Container(
@@ -33,21 +67,30 @@ class TransactionDetailScreen extends StatelessWidget {
                 color: Colors.blueGrey.shade700,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: const Row(
+              child: Row(
+                // Changed from const Row
                 children: [
-                  Icon(Icons.arrow_upward, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('400',
-                      style: TextStyle(color: Colors.white, fontSize: 20)),
+                  const Icon(Icons.arrow_upward,
+                      color: Colors.red), // Assuming all are expenses for now
+                  const SizedBox(width: 8),
+                  Text(
+                      transaction.amount
+                          .toStringAsFixed(2), // Use transaction amount
+                      style:
+                          const TextStyle(color: Colors.white, fontSize: 20)),
                 ],
               ),
             ),
             const SizedBox(height: 10),
-            _buildInfoTile(Icons.directions_bus, 'Transport', context),
+            _buildInfoTile(
+                _getIconForType(transaction.transType),
+                _getStringForType(transaction.transType),
+                context), // Use transaction type icon and string
             const SizedBox(height: 10),
-            _buildInfoTile(Icons.edit, 'blahblah', context),
+            _buildInfoTile(Icons.edit, transaction.transName,
+                context), // Use transaction name/notes
             const SizedBox(height: 20),
-            _buildSlipInfo(),
+            _buildSlipInfo(), // Keep slip info for now, might need adjustment later
             const Spacer(),
             Center(
               child: TextButton(
@@ -75,19 +118,24 @@ class TransactionDetailScreen extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white),
           const SizedBox(width: 8),
-          Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
-          
+          Expanded(
+            // Wrap Text in Expanded to prevent overflow and allow alignment
+            child: Text(text,
+                style: const TextStyle(color: Colors.white, fontSize: 16)),
+          ),
           Align(
+            // Keep Align for the edit button
             alignment: Alignment.centerRight,
             child: IconButton(
               icon: const Icon(Icons.edit, color: Colors.white),
               onPressed: () {
-                // go to add transaction page
-                Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => const AddTransaction())
-                  
-                  );
-
+                // TODO: Pass transaction data to edit screen
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            const AddTransaction()) // Pass transaction later
+                    );
               },
             ),
           )
@@ -116,15 +164,19 @@ class TransactionDetailScreen extends StatelessWidget {
                 child: Icon(Icons.person, color: Colors.blueGrey.shade900),
               ),
               const SizedBox(width: 8),
-              const Column(
+              Column(
+                // Changed from const Column
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('You',
+                  const Text('You', // Keep placeholder for now
                       style: TextStyle(color: Colors.white, fontSize: 14)),
-                  Text('นายประยุทธ์ น.',
+                  const Text('นายประยุทธ์ น.', // Keep placeholder for now
                       style: TextStyle(color: Colors.white70, fontSize: 12)),
-                  Text('Tue 24 Dec 24 22:08',
-                      style: TextStyle(color: Colors.white54, fontSize: 12)),
+                  Text(
+                      DateFormat('EEE dd MMM yy HH:mm').format(transaction
+                          .transactionDate), // Use transaction date/time
+                      style:
+                          const TextStyle(color: Colors.white54, fontSize: 12)),
                 ],
               ),
               const Spacer(),
