@@ -41,6 +41,31 @@ class _AddTransactionState extends State<AddTransaction> {
     }
     if (widget.initialNotes != null) {
       notesController.text = widget.initialNotes!;
+      // Attempt to automatically generate the category based on notes
+      _autoGenerateCategory(widget.initialNotes!);
+    }
+  }
+
+  // Helper function to call generateCategory asynchronously
+  Future<void> _autoGenerateCategory(String notes) async {
+    // Create a temporary transaction object just for category generation
+    // We need some dummy values for date and amount, they aren't used by generateCategory
+    final tempTrans = Trans(
+      transName: notes,
+      transactionDate: DateTime.now(), // Dummy date
+      amount: 0.0, // Dummy amount
+      transType: TransactionType.other, // Start with default
+    );
+
+    await tempTrans.generateCategory(); // Call the Firestore function
+
+    // Update the state if a category other than 'other' was generated
+    if (tempTrans.transType != TransactionType.other) {
+      setState(() {
+        // Convert the generated enum back to the lowercase string used by the UI
+        selectedCategory = transTypeToString(tempTrans.transType).toLowerCase();
+        debugPrint("Automatically set category to: $selectedCategory");
+      });
     }
   }
 
@@ -245,6 +270,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
                   trans.saveToDB(); // inserts into SQLite
                   TransList().addTransaction(trans); // add to in-memory session
+                  trans.voteCategory(); // Vote for the category in Firestore
                   debugPrint("==== Current TransList Transactions ====");
                   for (var t in TransList().transactions) {
                     debugPrint(t.toString());
