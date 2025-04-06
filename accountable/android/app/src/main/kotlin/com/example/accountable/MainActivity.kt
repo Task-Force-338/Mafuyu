@@ -1,4 +1,4 @@
-package com.spiralnuggets.kanade
+package com.spiralnuggets.mafuyu
 
 import io.flutter.embedding.android.FlutterActivity
 

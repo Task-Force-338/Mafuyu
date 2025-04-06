@@ -63,7 +63,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '852124663142',
     projectId: 'kanade-60135',
     storageBucket: 'kanade-60135.firebasestorage.app',
-    iosBundleId: 'com.spiralnuggets.kanade',
+    iosBundleId: 'com.spiralnuggets.mafuyu',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -72,7 +72,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '852124663142',
     projectId: 'kanade-60135',
     storageBucket: 'kanade-60135.firebasestorage.app',
-    iosBundleId: 'com.spiralnuggets.kanade',
+    iosBundleId: 'com.spiralnuggets.mafuyu',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(

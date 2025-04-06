@@ -42,7 +42,6 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
-  flutter_launcher_icons: "^0.14.3"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -50,7 +49,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icon/notaccountable.png"
+  image_path: "assets/icon/accountable.png"
 
 # The following section is specific to Flutter packages.
 flutter:
