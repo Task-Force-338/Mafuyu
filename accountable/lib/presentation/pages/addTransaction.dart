@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AddTransaction extends StatefulWidget {
-  const AddTransaction({super.key});
+  final String? initialAmount;
+  final String? initialNotes;
+
+  const AddTransaction({
+    super.key,
+    this.initialAmount,
+    this.initialNotes,
+  });
 
   @override
   State<AddTransaction> createState() => _AddTransactionState();
@@ -24,6 +31,43 @@ class _AddTransactionState extends State<AddTransaction> {
     'leisure',
     'other'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with passed data if available
+    if (widget.initialAmount != null) {
+      amountController.text = widget.initialAmount!;
+    }
+    if (widget.initialNotes != null) {
+      notesController.text = widget.initialNotes!;
+      // Attempt to automatically generate the category based on notes
+      _autoGenerateCategory(widget.initialNotes!);
+    }
+  }
+
+  // Helper function to call generateCategory asynchronously
+  Future<void> _autoGenerateCategory(String notes) async {
+    // Create a temporary transaction object just for category generation
+    // We need some dummy values for date and amount, they aren't used by generateCategory
+    final tempTrans = Trans(
+      transName: notes,
+      transactionDate: DateTime.now(), // Dummy date
+      amount: 0.0, // Dummy amount
+      transType: TransactionType.other, // Start with default
+    );
+
+    await tempTrans.generateCategory(); // Call the Firestore function
+
+    // Update the state if a category other than 'other' was generated
+    if (tempTrans.transType != TransactionType.other) {
+      setState(() {
+        // Convert the generated enum back to the lowercase string used by the UI
+        selectedCategory = transTypeToString(tempTrans.transType).toLowerCase();
+        debugPrint("Automatically set category to: $selectedCategory");
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -222,11 +266,11 @@ class _AddTransactionState extends State<AddTransaction> {
                     transactionDate: date,
                     amount: amount,
                     transType: transType,
-                    
                   );
 
                   trans.saveToDB(); // inserts into SQLite
                   TransList().addTransaction(trans); // add to in-memory session
+                  trans.voteCategory(); // Vote for the category in Firestore
                   debugPrint("==== Current TransList Transactions ====");
                   for (var t in TransList().transactions) {
                     debugPrint(t.toString());

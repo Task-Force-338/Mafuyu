@@ -4,6 +4,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
+// Firebase Imports
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 import 'package:accountable/presentation/pages/home_page.dart';
 import 'package:accountable/presentation/pages/file_upload_screen.dart';
 import 'package:accountable/presentation/pages/summary_screen.dart';
@@ -79,8 +83,15 @@ final GoRouter goRouter = GoRouter(
   ],
 );
 
-void main() {
+void main() async {
   usePathUrlStrategy(); // clean URLs on web
+
+  // Ensure Flutter bindings are initialized before Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(
     MultiProvider(

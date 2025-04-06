@@ -242,11 +242,15 @@ class Trans {
   });
 
   Trans.withType({
+    // This constructor might become less relevant if generateCategory is always called
     required this.transName,
     required this.transactionDate,
     required this.amount,
     required this.transType,
   });
+
+  // Add a constructor that calls generateCategory automatically? Or rely on caller.
+  // Let's rely on the caller for now to call generateCategory explicitly.
 
   @override
   String toString() {
@@ -254,36 +258,136 @@ class Trans {
     return 'Transaction{transName: $transName, transactionDate: $transactionDate, amount: $amount, transType: $transType}';
   }
 
-  void generateCategory() async {
-    await firebaseDB.collection("vendors").get().then((querySnapshot) {
-      for (var doc in querySnapshot.docs) {
-        if (transName.contains(doc["name"])) {
-          Map<String, int> categories = doc["votes"];
-          // sort it, get the string with the most int, and set it as the category
-          // if there's a tie, set it as one of the categories. the user can change it later
-          // which is pretty much what comes first in the sorted list
+  Future<void> generateCategory() async {
+    // Try to find a matching vendor and set the most likely category
+    debugPrint("[generateCategory] Starting for '$transName'");
+    try {
+      final querySnapshot = await firebaseDB.collection("vendors").get();
+      debugPrint(
+          "[generateCategory] Fetched ${querySnapshot.docs.length} vendors.");
+      String? bestVendorName;
+      Map<String, dynamic>? vendorData;
 
-          final sortedCategories = categories.entries.toList() // java moment
-            ..sort((a, b) => a.value.compareTo(b.value));
-          transType = stringToTransType(sortedCategories.last.key);
+      // Find the vendor whose name is contained in the transaction name
+      for (var doc in querySnapshot.docs) {
+        final docData = doc.data();
+        final vendorName = docData["name"] as String?;
+        if (vendorName != null &&
+            transName.toLowerCase().contains(vendorName.toLowerCase())) {
+          bestVendorName = vendorName;
+          vendorData = docData;
+          debugPrint(
+              "[generateCategory] Found matching vendor '$vendorName' for '$transName'");
+          break; // Found a match, stop searching
         }
       }
-    });
+
+      if (vendorData != null && vendorData.containsKey("votes")) {
+        final votesDynamic = vendorData["votes"] as Map<String, dynamic>? ?? {};
+        final Map<String, int> categories = votesDynamic
+            .map((key, value) => MapEntry(key, (value as num?)?.toInt() ?? 0));
+        debugPrint("[generateCategory] Vendor votes: $categories");
+
+        if (categories.isNotEmpty) {
+          final sortedCategories = categories.entries.toList()
+            ..sort((a, b) => b.value.compareTo(a.value)); // Sort descending
+
+          final winningCategory = sortedCategories.first.key.toLowerCase();
+          transType = stringToTransType(winningCategory);
+          debugPrint(
+              "[generateCategory] Generated category for '$transName': ${transTypeToString(transType)} (from $winningCategory)");
+          return;
+        }
+      } else {
+        debugPrint(
+            "[generateCategory] No matching vendor found or vendor has no 'votes' field for '$transName'.");
+      }
+      // If no vendor match or no votes, keep default or current type (often 'other')
+      debugPrint(
+          "[generateCategory] Could not generate category for '$transName', defaulting to ${transTypeToString(transType)}");
+    } catch (e, s) {
+      debugPrint(
+          "[generateCategory] Error generating category for '$transName': $e\nStack trace: $s");
+      // Keep default type on error
+    }
   }
 
-  void voteCategory(String category) async {
-    // if the user changes the category, make sure to save their vote too!
-    await firebaseDB.collection("vendors").get().then((querySnapshot) {
+  Future<void> voteCategory() async {
+    final categoryToVote = transTypeToString(transType).toLowerCase();
+    debugPrint(
+        "[voteCategory] Starting for '$transName' with category '$categoryToVote'");
+
+    if (categoryToVote == 'other') {
+      debugPrint(
+          "[voteCategory] Skipping vote for 'other' category for '$transName'");
+      return;
+    }
+
+    try {
+      final querySnapshot = await firebaseDB.collection("vendors").get();
+      debugPrint(
+          "[voteCategory] Fetched ${querySnapshot.docs.length} vendors.");
+      DocumentReference? vendorDocRef;
+      Map<String, dynamic>? vendorData;
+      String? foundVendorName;
+
+      // Find the matching vendor document
       for (var doc in querySnapshot.docs) {
-        if (transName.contains(doc["name"])) {
-          Map<String, int> categories = doc["votes"];
-          categories.update(category, (value) => value + 1,
-              ifAbsent: () => 1); // if the category doesn't exist, create it
-          doc.reference
-              .update({'votes': categories}); // if broke, tell me. i'll fix it
+        final docData = doc.data();
+        final vendorName = docData["name"] as String?;
+        if (vendorName != null &&
+            transName.toLowerCase().contains(vendorName.toLowerCase())) {
+          vendorDocRef = doc.reference;
+          vendorData = docData;
+          foundVendorName = vendorName;
+          debugPrint(
+              "[voteCategory] Found matching vendor '$vendorName' (Doc ID: ${doc.id}) for '$transName'");
+          break;
         }
       }
-    });
+
+      if (vendorDocRef != null && vendorData != null) {
+        final votesDynamic = vendorData["votes"] as Map<String, dynamic>? ?? {};
+        final Map<String, int> categories = votesDynamic
+            .map((key, value) => MapEntry(key, (value as num?)?.toInt() ?? 0));
+        debugPrint("[voteCategory] Existing votes: $categories");
+
+        // Increment the vote count for the transaction's category
+        categories.update(categoryToVote, (value) => value + 1,
+            ifAbsent: () => 1);
+        debugPrint("[voteCategory] Updated votes: $categories");
+
+        // Update Firestore
+        await vendorDocRef.update({'votes': categories});
+        debugPrint(
+            "[voteCategory] Successfully voted for category '$categoryToVote' for vendor '$foundVendorName'");
+      } else {
+        debugPrint(
+            "[voteCategory] Vendor not found for '$transName'. Creating new vendor and voting for category '$categoryToVote'.");
+        final initialVotes = {
+          'food': 0,
+          'personal': 0,
+          'utility': 0,
+          'transportation': 0,
+          'health': 0,
+          'leisure': 0,
+          'other': 0,
+        };
+        initialVotes[categoryToVote] = 1;
+        debugPrint(
+            "[voteCategory] Initial votes for new vendor: $initialVotes");
+
+        await firebaseDB.collection("vendors").add({
+          'name': transName,
+          'votes': initialVotes,
+        });
+        debugPrint(
+            "[voteCategory] Successfully created new vendor '$transName' with initial vote for '$categoryToVote'");
+      }
+    } catch (e, s) {
+      debugPrint(
+          "[voteCategory] Error voting for category '$categoryToVote' for '$transName': $e\nStack trace: $s");
+    }
   }
 
   void saveToDB() async {
