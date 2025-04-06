@@ -18,7 +18,7 @@ IconData _getIconForTransactionType(TransactionType type) {
     case TransactionType.health:
       return Icons.healing;
     case TransactionType.leisure:
-      return Icons.sports_esports; // Or other relevant icon
+      return Icons.sports_esports; // Or other relevant icon. idk im not a cop.
     case TransactionType.other:
       return Icons.category;
     default:
