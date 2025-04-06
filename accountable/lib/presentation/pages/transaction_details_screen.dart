@@ -90,7 +90,7 @@ class TransactionDetailScreen extends StatelessWidget {
             _buildInfoTile(Icons.edit, transaction.transName,
                 context), // Use transaction name/notes
             const SizedBox(height: 20),
-            _buildSlipInfo(), // Keep slip info for now, might need adjustment later
+            // _buildSlipInfo(), // Commented out mock slip info
             const Spacer(),
             Center(
               child: TextButton(
@@ -144,6 +144,8 @@ class TransactionDetailScreen extends StatelessWidget {
     );
   }
 
+  // Commented out mock slip info method
+  /*
   Widget _buildSlipInfo() {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -195,4 +197,5 @@ class TransactionDetailScreen extends StatelessWidget {
       ),
     );
   }
+  */
 }

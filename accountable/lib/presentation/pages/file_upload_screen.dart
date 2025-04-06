@@ -1,5 +1,6 @@
 import 'package:accountable/backend/app_state.dart';
 import 'package:accountable/presentation/pages/addTransaction.dart';
+import 'package:accountable/presentation/pages/credit_card_statement_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:accountable/services/ocr_service.dart';
@@ -125,7 +126,51 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 50),
+            const SizedBox(height: 20),
+
+            // Upload options tabs
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.receipt_long, color: Colors.white),
+                  label: const Text('E-Slip',
+                      style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade600,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () {
+                    // We're already on this screen
+                  },
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.credit_card, color: Colors.white),
+                  label: const Text(
+                    'Credit Card\nStatement',
+                    style: TextStyle(color: Colors.white),
+                    textAlign: TextAlign.center,
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueGrey.shade500,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CreditCardStatementScreen(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
             const Icon(
               Icons.cloud_upload,
               color: Colors.white,
