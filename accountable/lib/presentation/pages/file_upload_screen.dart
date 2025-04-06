@@ -23,7 +23,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['jpg', 'png', 'jpeg'],
+        allowedExtensions: ['jpg', 'png', 'jpeg', 'pdf'],
       );
 
       if (result != null && result.files.single.path != null) {

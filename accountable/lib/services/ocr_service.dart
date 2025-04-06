@@ -2,7 +2,7 @@ import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
 import 'dart:io'; // Required for File operations if needed, though path is usually sufficient
 import 'package:image/image.dart' as img; // Add this for image processing
 import 'dart:typed_data'; // Add this for Uint8List
-import 'package:pdf_text/pdf_text.dart'; // Import the pdf_text package
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class OcrService {
   /// Extracts text from an image file using Tesseract OCR.
@@ -48,8 +48,22 @@ class OcrService {
   /// Returns the extracted text as a single string.
   Future<String> _extractTextFromPdf(String pdfPath) async {
     try {
-      PDFDoc doc = await PDFDoc.fromPath(pdfPath);
-      String text = await doc.text;
+      // Load the PDF document
+      File file = File(pdfPath);
+      List<int> bytes = await file.readAsBytes();
+      PdfDocument document = PdfDocument(inputBytes: bytes);
+
+      // Extract text from all pages
+      String text = '';
+      PdfTextExtractor extractor = PdfTextExtractor(document);
+
+      for (int i = 0; i < document.pages.count; i++) {
+        text += extractor.extractText(startPageIndex: i) + '\n';
+      }
+
+      // Dispose the document
+      document.dispose();
+
       return text;
     } catch (e) {
       print("Error during PDF text extraction: $e");

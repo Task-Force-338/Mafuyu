@@ -200,6 +200,7 @@ class _HomePageState extends State<HomePage> {
                           subtitle: trans.transName,
                           amount: trans.amount.toStringAsFixed(2),
                           context: context,
+                          transaction: trans,
                         );
                       }).toList();
 
@@ -266,35 +267,42 @@ class _HomePageState extends State<HomePage> {
     required String subtitle,
     required String amount,
     required BuildContext context,
+    Trans? transaction,
   }) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(40, 0, 0, 20),
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 25),
-      decoration: BoxDecoration(
-        color: Colors.blue[500],
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(icon),
-            onPressed: () => context.go(widget.detailsPath),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(fontSize: 16, color: Colors.white)),
-                Text(subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.white)),
-              ],
+    return GestureDetector(
+      onTap: () {
+        if (transaction != null) {
+          context.go(widget.detailsPath, extra: transaction);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(40, 0, 0, 20),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 25),
+        decoration: BoxDecoration(
+          color: Colors.blue[500],
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style:
+                          const TextStyle(fontSize: 16, color: Colors.white)),
+                  Text(subtitle,
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.white)),
+                ],
+              ),
             ),
-          ),
-          Text(amount,
-              style: const TextStyle(fontSize: 16, color: Colors.white)),
-        ],
+            Text(amount,
+                style: const TextStyle(fontSize: 16, color: Colors.white)),
+          ],
+        ),
       ),
     );
   }

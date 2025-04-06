@@ -1,6 +1,5 @@
 import 'package:accountable/backend/app_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
@@ -46,7 +45,10 @@ final GoRouter goRouter = GoRouter(
               routes: [
                 GoRoute(
                   path: 'transaction_details',
-                  builder: (context, state) => const TransactionDetailScreen(),
+                  builder: (context, state) {
+                    final transaction = state.extra as Trans;
+                    return TransactionDetailScreen(transaction: transaction);
+                  },
                 ),
               ],
             ),
