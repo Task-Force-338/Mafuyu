@@ -6,6 +6,15 @@ import 'package:file_picker/file_picker.dart';
 import 'package:accountable/services/ocr_service.dart';
 import 'dart:io';
 
+// Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF6A5E7A);
+const Color _secondaryColor = Color(0xFF888888);
+const Color _accentColor = Color(0xFF9B8EB8);
+const Color _textColor = Color(0xFFE0E0E0);
+const Color _backgroundDark = Color(0xFF2D2B35);
+const Color _cardDark = Color(0xFF3A364A);
+const Color _cardLightDark = Color(0xFF4A4758);
+
 class FileUploadScreen extends StatefulWidget {
   const FileUploadScreen({super.key});
 
@@ -89,10 +98,10 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade900,
+      backgroundColor: _backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade200,
-        title: const Text('Upload E-Slip'),
+        backgroundColor: _primaryColor,
+        title: const Text('Upload E-Slip', style: TextStyle(color: _textColor)),
         centerTitle: true,
       ),
       body: Padding(
@@ -104,7 +113,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               padding:
                   const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               decoration: BoxDecoration(
-                color: Colors.blueGrey.shade700,
+                color: _cardDark,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
@@ -112,7 +121,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 children: [
                   const Text(
                     'Automatic Upload',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(color: _textColor, fontSize: 16),
                   ),
                   Switch(
                     value: isAutomaticUpload,
@@ -121,7 +130,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                         isAutomaticUpload = value;
                       });
                     },
-                    activeColor: Colors.white,
+                    activeColor: _accentColor,
+                    activeTrackColor: _primaryColor,
                   )
                 ],
               ),
@@ -133,11 +143,11 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.receipt_long, color: Colors.white),
-                  label: const Text('E-Slip',
-                      style: TextStyle(color: Colors.white)),
+                  icon: const Icon(Icons.receipt_long, color: _textColor),
+                  label:
+                      const Text('E-Slip', style: TextStyle(color: _textColor)),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueGrey.shade600,
+                    backgroundColor: _primaryColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 12),
                   ),
@@ -147,14 +157,14 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton.icon(
-                  icon: const Icon(Icons.credit_card, color: Colors.white),
+                  icon: const Icon(Icons.credit_card, color: _textColor),
                   label: const Text(
                     'Credit Card\nStatement',
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: _textColor),
                     textAlign: TextAlign.center,
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueGrey.shade500,
+                    backgroundColor: _cardLightDark,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 12),
                   ),
@@ -173,14 +183,14 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             const SizedBox(height: 30),
             const Icon(
               Icons.cloud_upload,
-              color: Colors.white,
+              color: _accentColor,
               size: 80,
             ),
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _isProcessing ? null : _pickAndProcessFile,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey.shade600,
+                backgroundColor: _primaryColor,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -192,13 +202,13 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
-                        color: Colors.white,
+                        color: _textColor,
                         strokeWidth: 2,
                       ),
                     )
                   : const Text(
                       'SELECT FILE',
-                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      style: TextStyle(color: _textColor, fontSize: 16),
                     ),
             ),
             if (_selectedFilePath != null) ...[

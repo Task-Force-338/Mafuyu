@@ -5,6 +5,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:accountable/services/ocr_service.dart';
 import 'dart:io';
 
+// Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF6A5E7A);
+const Color _secondaryColor = Color(0xFF888888);
+const Color _accentColor = Color(0xFF9B8EB8);
+const Color _textColor = Color(0xFFE0E0E0);
+const Color _backgroundDark = Color(0xFF2D2B35);
+const Color _cardDark = Color(0xFF3A364A);
+const Color _errorColor = Color(0xFFE57373); // Light red for errors
+const Color _successColor = Color(0xFF81C784); // Light green for success
+
 class CreditCardStatementScreen extends StatefulWidget {
   const CreditCardStatementScreen({super.key});
 
@@ -206,10 +216,13 @@ class _CreditCardStatementScreenState extends State<CreditCardStatementScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade900,
+      backgroundColor: _backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade200,
-        title: const Text('Credit Card Statement'),
+        backgroundColor: _primaryColor,
+        title: const Text(
+          'Credit Card Statement Upload',
+          style: TextStyle(color: _textColor),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -217,143 +230,139 @@ class _CreditCardStatementScreenState extends State<CreditCardStatementScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 20),
-            const Icon(
-              Icons.credit_card,
-              color: Colors.white,
-              size: 60,
+            Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: _cardDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.credit_card,
+                    color: _textColor,
+                    size: 50,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Upload your credit card statement PDF to automatically extract transactions',
+                    style: TextStyle(color: _textColor, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
-            const Text(
-              'Upload your credit card statement PDF',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
             const SizedBox(height: 20),
-
-            // Password dialog if required
-            if (_passwordRequired) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey.shade700,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  children: [
-                    const Text(
-                      'This PDF is password protected',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Enter the password to decrypt the file. Your password will not be stored.',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 15),
-                    TextField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.blueGrey.shade600,
-                        hintText: 'PDF Password',
-                        hintStyle:
-                            TextStyle(color: Colors.white.withOpacity(0.5)),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 14),
+            Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: _cardDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Upload a PDF statement from your bank',
+                    style: TextStyle(
+                        color: _textColor.withOpacity(0.7), fontSize: 14),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    enabled: false,
+                    decoration: InputDecoration(
+                      fillColor: Colors.transparent,
+                      hintText: _selectedFilePath != null
+                          ? File(_selectedFilePath!).path.split('/').last
+                          : 'No file selected',
+                      hintStyle: TextStyle(color: _textColor.withOpacity(0.5)),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: _secondaryColor),
                       ),
-                      style: const TextStyle(color: Colors.white),
-                      obscureText: true,
-                      onSubmitted: (_) => _submitPassword(),
                     ),
-                    const SizedBox(height: 15),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    style: const TextStyle(color: _textColor),
+                  ),
+                  const SizedBox(height: 16),
+                  // Upload button
+                  if (_passwordRequired)
+                    Column(
                       children: [
+                        TextField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Password',
+                            labelStyle: TextStyle(color: _textColor),
+                            hintText: 'Enter PDF password',
+                            hintStyle:
+                                TextStyle(color: _textColor.withOpacity(0.7)),
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(color: _secondaryColor),
+                            ),
+                          ),
+                          style: const TextStyle(color: _textColor),
+                          obscureText: true,
+                        ),
+                        const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: _submitPassword,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade300,
+                            backgroundColor: _primaryColor,
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 10),
+                                horizontal: 30, vertical: 12),
                           ),
-                          child: const Text('Submit',
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                        const SizedBox(width: 10),
-                        TextButton(
-                          onPressed: _pickAndProcessFile,
-                          child: const Text('Choose Different File',
-                              style: TextStyle(color: Colors.white70)),
+                          child: const Text(
+                            'Submit Password',
+                            style: TextStyle(color: _textColor),
+                          ),
                         ),
                       ],
+                    )
+                  else
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.upload_file, color: _textColor),
+                      label: Text(
+                        'SELECT PDF FILE',
+                        style: const TextStyle(color: _textColor),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 12),
+                      ),
+                      onPressed: _isProcessing ? null : _pickAndProcessFile,
                     ),
-                  ],
-                ),
+                ],
               ),
-            ] else ...[
-              ElevatedButton.icon(
-                icon: const Icon(Icons.upload_file, color: Colors.white),
-                label: Text(
-                  _selectedFilePath == null ? 'SELECT PDF FILE' : 'CHANGE FILE',
-                  style: const TextStyle(color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueGrey.shade600,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+            ),
+            const SizedBox(height: 20),
+            if (_isProcessing)
+              Column(
+                children: [
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(color: _accentColor),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Processing your statement...',
+                    style: TextStyle(color: _textColor.withOpacity(0.7)),
                   ),
-                ),
-                onPressed: _isProcessing ? null : _pickAndProcessFile,
+                ],
               ),
-            ],
-
-            if (_selectedFilePath != null && !_passwordRequired) ...[
-              const SizedBox(height: 15),
-              Text(
-                'Selected: ${_selectedFilePath!.split(Platform.pathSeparator).last}',
-                style: const TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ],
-
-            // Processing indicator
-            if (_isProcessing) ...[
-              const SizedBox(height: 20),
-              const CircularProgressIndicator(color: Colors.white),
-              const SizedBox(height: 10),
-              const Text(
-                'Processing PDF...\nThis may take a moment',
-                style: TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ],
 
             // Transactions list
             if (_extractedTransactions.isNotEmpty) ...[
               const SizedBox(height: 20),
-              const Divider(color: Colors.white24),
+              const Divider(color: _secondaryColor),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'Found ${_extractedTransactions.length} Transactions',
                   style: const TextStyle(
-                      color: Colors.white,
+                      color: _textColor,
                       fontSize: 16,
                       fontWeight: FontWeight.bold),
                 ),
               ),
-              const Divider(color: Colors.white24),
+              const Divider(color: _secondaryColor),
               Expanded(
                 child: ListView.builder(
                   itemCount: _extractedTransactions.length,
@@ -372,92 +381,76 @@ class _CreditCardStatementScreenState extends State<CreditCardStatementScreen> {
                             true;
 
                     final Color amountColor =
-                        isExpense ? Colors.red.shade300 : Colors.green.shade300;
+                        isExpense ? _errorColor : _successColor;
 
-                    return Card(
-                      color: Colors.blueGrey.shade800,
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 6, horizontal: 0),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _cardDark,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: ListTile(
-                        title: Text(
-                          transaction['description'] ?? 'Unknown Merchant',
-                          style: const TextStyle(
-                              color: Colors.white, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                        ),
+                        title: Text(transaction['description'] ?? 'Unknown',
+                            style: const TextStyle(
+                                color: _textColor, fontWeight: FontWeight.bold),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Icon(Icons.date_range,
-                                    size: 14, color: Colors.white60),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Trans: ${transaction['date'] ?? 'Unknown'}',
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                              ],
-                            ),
-                            if (transaction['posting_date'] != null)
-                              Row(
-                                children: [
-                                  Icon(Icons.book,
-                                      size: 14, color: Colors.white60),
-                                  SizedBox(width: 4),
-                                  Text(
-                                    'Post: ${transaction['posting_date']}',
-                                    style:
-                                        const TextStyle(color: Colors.white70),
-                                  ),
-                                ],
-                              ),
-                            Row(
-                              children: [
-                                Icon(Icons.attach_money,
-                                    size: 14, color: Colors.white60),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Amount: ${transaction['amount'] ?? 'Unknown'}',
-                                  style: TextStyle(
-                                      color: amountColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
+                            const SizedBox(height: 4),
+                            Text('Date: ${transaction['date'] ?? 'Unknown'}',
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: _textColor.withOpacity(0.6)),
+                                maxLines: 1),
+                            const SizedBox(height: 2),
+                            Text(
+                                'Posting: ${transaction['posting_date'] ?? 'Unknown'}',
+                                style: TextStyle(
+                                    color: _textColor.withOpacity(0.7)),
+                                maxLines: 1),
                           ],
                         ),
-                        trailing: IconButton(
-                          icon:
-                              const Icon(Icons.add_circle, color: Colors.green),
-                          onPressed: () => _addTransactionToApp(transaction),
-                          tooltip: 'Add this transaction',
+                        trailing: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(amountStr,
+                                style:
+                                    TextStyle(fontSize: 14, color: amountColor),
+                                maxLines: 1),
+                            const SizedBox(height: 2),
+                            Text(
+                                'Merchant: ${transaction['merchant'] ?? 'Unknown'}',
+                                style: TextStyle(
+                                    color: _textColor.withOpacity(0.7)),
+                                maxLines: 1),
+                          ],
                         ),
-                        isThreeLine: true,
+                        onTap: () => _addTransactionToApp(transaction),
+                        // Add icon to show it's tappable
+                        leading:
+                            const Icon(Icons.add_circle, color: _accentColor),
                       ),
                     );
                   },
                 ),
               ),
-            ] else if (!_isProcessing &&
-                _selectedFilePath != null &&
-                !_passwordRequired) ...[
+            ] else if (!_isProcessing && _selectedFilePath != null) ...[
               const SizedBox(height: 30),
-              const Text(
-                'No transactions found in the statement.\nTry a different file or check file format.',
-                style: TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
+              // Show "no transactions found" message
+              Text(
+                'No transactions found in the document.',
+                style: TextStyle(color: _textColor.withOpacity(0.7)),
               ),
-            ] else if (!_isProcessing && _selectedFilePath == null) ...[
-              const Expanded(
-                child: Center(
-                  child: Text(
-                    'Upload a credit card statement PDF to extract transactions automatically.',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+              const SizedBox(height: 10),
+              Text(
+                'Try uploading a different statement or check if your bank format is supported.',
+                style:
+                    TextStyle(color: _textColor.withOpacity(0.7), fontSize: 16),
+                textAlign: TextAlign.center,
               ),
             ],
           ],

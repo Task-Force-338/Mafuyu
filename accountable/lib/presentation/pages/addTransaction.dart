@@ -2,6 +2,14 @@ import 'package:accountable/backend/app_state.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF6A5E7A);
+const Color _secondaryColor = Color(0xFF888888);
+const Color _accentColor = Color(0xFF9B8EB8);
+const Color _textColor = Color(0xFFE0E0E0);
+const Color _backgroundDark = Color(0xFF2D2B35);
+const Color _cardDark = Color(0xFF3A364A);
+
 class AddTransaction extends StatefulWidget {
   final String? initialAmount;
   final String? initialNotes;
@@ -93,14 +101,17 @@ class _AddTransactionState extends State<AddTransaction> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Select Category'),
+          backgroundColor: _cardDark,
+          title: Text('Select Category', style: TextStyle(color: _textColor)),
           content: SingleChildScrollView(
             child: Column(
               children: categories
                   .map((category) => RadioListTile<String>(
-                        title: Text(category),
+                        title:
+                            Text(category, style: TextStyle(color: _textColor)),
                         value: category,
                         groupValue: selectedCategory,
+                        activeColor: _accentColor,
                         onChanged: (value) {
                           setState(() {
                             selectedCategory = value;
@@ -121,14 +132,17 @@ class _AddTransactionState extends State<AddTransaction> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Select Transaction Type'),
+          backgroundColor: _cardDark,
+          title: Text('Select Transaction Type',
+              style: TextStyle(color: _textColor)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: ['Deposit', 'Withdraw']
                 .map((type) => RadioListTile<String>(
-                      title: Text(type),
+                      title: Text(type, style: TextStyle(color: _textColor)),
                       value: type,
                       groupValue: transactionType,
+                      activeColor: _accentColor,
                       onChanged: (value) {
                         setState(() {
                           transactionType = value!;
@@ -149,6 +163,20 @@ class _AddTransactionState extends State<AddTransaction> {
       initialDate: selectedDate ?? DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: _primaryColor,
+              onPrimary: _textColor,
+              surface: _cardDark,
+              onSurface: _textColor,
+            ),
+            dialogBackgroundColor: _backgroundDark,
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null && picked != selectedDate) {
       setState(() {
@@ -160,61 +188,64 @@ class _AddTransactionState extends State<AddTransaction> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade900,
+      backgroundColor: _backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.blue.shade200,
+        backgroundColor: _primaryColor,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: Icon(Icons.arrow_back, color: _textColor),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Add Transaction',
-            style: TextStyle(color: Colors.white)),
+        title: Text('Add Transaction', style: TextStyle(color: _textColor)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Amount',
-                style: TextStyle(color: Colors.white70, fontSize: 16)),
+            Text('Amount',
+                style: TextStyle(
+                    color: _textColor.withOpacity(0.7), fontSize: 16)),
             TextField(
               controller: amountController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: const TextStyle(color: _textColor),
+              decoration: InputDecoration(
                 suffixText: 'THB',
-                suffixStyle: TextStyle(color: Colors.white),
+                suffixStyle: const TextStyle(color: _textColor),
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white70),
+                  borderSide: BorderSide(color: _textColor.withOpacity(0.7)),
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            const Text('Date',
-                style: TextStyle(color: Colors.white70, fontSize: 16)),
+            Text('Date',
+                style: TextStyle(
+                    color: _textColor.withOpacity(0.7), fontSize: 16)),
             GestureDetector(
               onTap: () => _selectDate(context),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.white70)),
+                decoration: BoxDecoration(
+                  border: Border(
+                      bottom: BorderSide(color: _textColor.withOpacity(0.7))),
                 ),
                 child: Text(
                   selectedDate == null
                       ? 'Select Date'
                       : '${selectedDate!.toLocal()}'.split(' ')[0],
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(color: _textColor),
                 ),
               ),
             ),
             const SizedBox(height: 10),
-            const Text('Notes',
-                style: TextStyle(color: Colors.white70, fontSize: 16)),
+            Text('Notes',
+                style: TextStyle(
+                    color: _textColor.withOpacity(0.7), fontSize: 16)),
             TextField(
               controller: notesController,
-              style: const TextStyle(color: Colors.white),
-              decoration: const InputDecoration(
+              style: const TextStyle(color: _textColor),
+              decoration: InputDecoration(
                 enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white70),
+                  borderSide: BorderSide(color: _textColor.withOpacity(0.7)),
                 ),
               ),
             ),
@@ -224,22 +255,22 @@ class _AddTransactionState extends State<AddTransaction> {
                 ElevatedButton(
                   onPressed: _showCategoryDialog,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade500,
+                    backgroundColor: _accentColor,
                   ),
                   child: Text(
                     selectedCategory ?? 'Add Category',
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: _textColor),
                   ),
                 ),
                 const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _showTransactionTypeDialog,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade500,
+                    backgroundColor: _accentColor,
                   ),
                   child: Text(
                     transactionType,
-                    style: const TextStyle(color: Colors.white),
+                    style: const TextStyle(color: _textColor),
                   ),
                 ),
               ],
@@ -248,7 +279,7 @@ class _AddTransactionState extends State<AddTransaction> {
             Center(
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade500,
+                  backgroundColor: _accentColor,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                   shape: RoundedRectangleBorder(
@@ -294,7 +325,7 @@ class _AddTransactionState extends State<AddTransaction> {
                 },
                 child: const Text(
                   'Save Transaction',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: _textColor),
                 ),
               ),
             ),

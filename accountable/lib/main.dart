@@ -119,7 +119,62 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       routerConfig: goRouter,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.indigo),
+      theme: ThemeData(
+        // Primary color - Muted Purple-Grey / Deep Indigo
+        primaryColor: const Color(0xFF6A5E7A),
+        primarySwatch: Colors.indigo,
+
+        // Background colors - Dark Greys, Dark Primary Shades
+        scaffoldBackgroundColor: const Color(0xFF2D2B35),
+
+        // Card & Surface colors
+        cardColor: const Color(0xFF3A364A),
+        canvasColor: const Color(0xFF32303D),
+
+        // Text colors - Light Grey / Off-White for readability
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Color(0xFFE0E0E0)),
+          bodyMedium: TextStyle(color: Color(0xFFE0E0E0)),
+          titleLarge: TextStyle(color: Color(0xFFE0E0E0)),
+          titleMedium: TextStyle(color: Color(0xFFE0E0E0)),
+          titleSmall: TextStyle(color: Color(0xFFE0E0E0)),
+        ),
+
+        // Accent colors - Pale Lavender, Desaturated Light Blue/Cyan
+        colorScheme: ColorScheme.dark(
+          primary: const Color(0xFF6A5E7A),
+          secondary: const Color(0xFF888888), // Mafuyu's official color
+          tertiary: const Color(0xFF9B8EB8), // Pale Lavender accent
+          surface: const Color(0xFF3A364A),
+          background: const Color(0xFF2D2B35),
+          error: Colors.red.shade300,
+          onPrimary: const Color(0xFFE0E0E0),
+          onSecondary: const Color(0xFFE0E0E0),
+          onSurface: const Color(0xFFE0E0E0),
+          onBackground: const Color(0xFFE0E0E0),
+        ),
+
+        // Button colors
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF6A5E7A),
+            foregroundColor: const Color(0xFFE0E0E0),
+          ),
+        ),
+
+        // App bar theme
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF3A364A),
+          foregroundColor: Color(0xFFE0E0E0),
+        ),
+
+        // Bottom navigation bar theme
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF3A364A),
+          selectedItemColor: Color(0xFF9B8EB8), // Pale Lavender accent
+          unselectedItemColor: Color(0xFF888888), // Medium Grey
+        ),
+      ),
     );
   }
 }
@@ -170,10 +225,24 @@ class ScaffoldWithNavigationBar extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
+        backgroundColor: const Color(0xFF3A364A),
+        indicatorColor: const Color(0xFF6A5E7A),
         destinations: const [
-          NavigationDestination(label: 'Home', icon: Icon(Icons.home)),
-          NavigationDestination(label: 'New', icon: Icon(Icons.add)),
-          NavigationDestination(label: 'Summary', icon: Icon(Icons.add_chart)),
+          NavigationDestination(
+            label: 'Home',
+            icon: Icon(Icons.home, color: Color(0xFF888888)),
+            selectedIcon: Icon(Icons.home, color: Color(0xFFE0E0E0)),
+          ),
+          NavigationDestination(
+            label: 'New',
+            icon: Icon(Icons.add, color: Color(0xFF888888)),
+            selectedIcon: Icon(Icons.add, color: Color(0xFFE0E0E0)),
+          ),
+          NavigationDestination(
+            label: 'Summary',
+            icon: Icon(Icons.add_chart, color: Color(0xFF888888)),
+            selectedIcon: Icon(Icons.add_chart, color: Color(0xFFE0E0E0)),
+          ),
         ],
       ),
     );

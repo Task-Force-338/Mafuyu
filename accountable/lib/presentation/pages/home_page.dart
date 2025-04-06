@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+// Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF6A5E7A);
+const Color _secondaryColor = Color(0xFF888888);
+const Color _accentColor = Color(0xFF9B8EB8);
+const Color _textColor = Color(0xFFE0E0E0);
+const Color _backgroundDark = Color(0xFF2D2B35);
+const Color _cardDark = Color(0xFF3A364A);
+
 class HomePage extends StatefulWidget {
   final String detailsPath;
 
@@ -104,7 +112,7 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_ios),
+              icon: const Icon(Icons.arrow_back_ios, color: _textColor),
               onPressed: () {
                 setState(() {
                   selectedDate = DateTime(
@@ -130,12 +138,14 @@ class _HomePageState extends State<HomePage> {
               },
               child: Text(
                 '${getMonthName(selectedDate.month)} ${selectedDate.year}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: _textColor),
               ),
             ),
             IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
+              icon: const Icon(Icons.arrow_forward_ios, color: _textColor),
               onPressed: () {
                 setState(() {
                   selectedDate = DateTime(
@@ -172,12 +182,12 @@ class _HomePageState extends State<HomePage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[900],
+                      color: _primaryColor,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       'Monthly Total: $totalExpense',
-                      style: const TextStyle(fontSize: 24, color: Colors.white),
+                      style: const TextStyle(fontSize: 24, color: _textColor),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -185,7 +195,7 @@ class _HomePageState extends State<HomePage> {
                   if (allDailyTrans.isEmpty)
                     const Center(
                         child: Text("No transactions for this month.",
-                            style: TextStyle(color: Colors.white70)))
+                            style: TextStyle(color: Color(0xFFBBBBBB))))
                   else
                     ...allDailyTrans.map((dailyList) {
                       final dayTotal = dailyList.transactions
@@ -230,7 +240,7 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue[800],
+        color: _cardDark,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -241,14 +251,14 @@ class _HomePageState extends State<HomePage> {
             children: [
               Text(
                 day,
-                style: const TextStyle(fontSize: 16, color: Colors.white),
+                style: const TextStyle(fontSize: 16, color: _textColor),
               ),
               Row(
                 children: [
-                  const Icon(Icons.arrow_upward, size: 16, color: Colors.white),
+                  const Icon(Icons.arrow_upward, size: 16, color: _textColor),
                   Text(
                     'Expense $totalExpense',
-                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                    style: const TextStyle(fontSize: 14, color: _textColor),
                   ),
                 ],
               ),
@@ -279,28 +289,26 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.fromLTRB(40, 0, 0, 20),
         padding: const EdgeInsets.fromLTRB(10, 10, 10, 25),
         decoration: BoxDecoration(
-          color: Colors.blue[500],
+          color: _primaryColor,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            Icon(icon),
+            Icon(icon, color: _textColor),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(title,
-                      style:
-                          const TextStyle(fontSize: 16, color: Colors.white)),
+                      style: const TextStyle(fontSize: 16, color: _textColor)),
                   Text(subtitle,
-                      style:
-                          const TextStyle(fontSize: 14, color: Colors.white)),
+                      style: const TextStyle(fontSize: 14, color: _textColor)),
                 ],
               ),
             ),
             Text(amount,
-                style: const TextStyle(fontSize: 16, color: Colors.white)),
+                style: const TextStyle(fontSize: 16, color: _textColor)),
           ],
         ),
       ),

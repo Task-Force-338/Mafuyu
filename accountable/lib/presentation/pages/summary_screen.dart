@@ -4,6 +4,28 @@ import 'package:provider/provider.dart';
 import '../../backend/app_state.dart';
 import 'package:intl/intl.dart'; // Import for DateFormat
 
+// Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF6A5E7A);
+const Color _secondaryColor = Color(0xFF888888);
+const Color _accentColor = Color(0xFF9B8EB8);
+const Color _textColor = Color(0xFFE0E0E0);
+const Color _backgroundDark = Color(0xFF2D2B35);
+const Color _cardDark = Color(0xFF3A364A);
+
+// Custom chart colors in Mafuyu theme
+final List<Color> _chartColors = [
+  Color(0xFF6A5E7A), // Primary
+  Color(0xFF888888), // Secondary
+  Color(0xFF9B8EB8), // Accent
+  Color(0xFF59546D), // Darker Primary
+  Color(0xFF7A8CA3), // Desaturated Light Blue
+  Color(0xFF807794), // Lighter Primary
+  Color(0xFFAA9FC0), // Lighter Accent
+  Color(0xFF6D7A8C), // Desaturated Medium Blue
+  Color(0xFF9188A3), // Medium Lavender
+  Color(0xFF584F6D), // Deepest Indigo
+];
+
 // Helper function to get icon based on transaction type
 IconData _getIconForTransactionType(TransactionType type) {
   switch (type) {
@@ -48,24 +70,38 @@ class BudgetSummaryScreen extends StatelessWidget {
           .toList();
 
       return ListTile(
-        leading: Icon(_getIconForTransactionType(categoryType)),
-        title: Text(transTypeToString(categoryType)),
-        trailing: Text(entry.value.toStringAsFixed(2)),
+        leading:
+            Icon(_getIconForTransactionType(categoryType), color: _textColor),
+        title: Text(transTypeToString(categoryType),
+            style: TextStyle(color: _textColor)),
+        trailing: Text(entry.value.toStringAsFixed(2),
+            style: TextStyle(color: _textColor)),
         onTap: () {
           // Show dialog on tap
           showDialog(
             context: context,
             builder: (BuildContext context) {
               return SimpleDialog(
-                title: Text('${transTypeToString(categoryType)} Transactions'),
+                backgroundColor: _cardDark,
+                title: Text('${transTypeToString(categoryType)} Transactions',
+                    style: TextStyle(color: _textColor)),
                 children: categoryTransactions.isEmpty
-                    ? [const ListTile(title: Text('No transactions found.'))]
+                    ? [
+                        ListTile(
+                            title: Text('No transactions found.',
+                                style: TextStyle(color: _textColor)))
+                      ]
                     : categoryTransactions.map((trans) {
                         return ListTile(
-                          title: Text(trans.transName),
-                          subtitle: Text(DateFormat('yyyy-MM-dd')
-                              .format(trans.transactionDate)), // Format date
-                          trailing: Text(trans.amount.toStringAsFixed(2)),
+                          title: Text(trans.transName,
+                              style: TextStyle(color: _textColor)),
+                          subtitle: Text(
+                              DateFormat('yyyy-MM-dd')
+                                  .format(trans.transactionDate),
+                              style: TextStyle(
+                                  color: Color(0xFFBBBBBB))), // Format date
+                          trailing: Text(trans.amount.toStringAsFixed(2),
+                              style: TextStyle(color: _textColor)),
                         );
                       }).toList(),
               );
@@ -76,23 +112,26 @@ class BudgetSummaryScreen extends StatelessWidget {
     }).toList();
 
     return Scaffold(
+      backgroundColor: _backgroundDark,
       appBar: AppBar(
-        backgroundColor: Colors.blue[200],
-        title: const Text('Budget Summary'),
+        backgroundColor: _primaryColor,
+        title:
+            const Text('Budget Summary', style: TextStyle(color: _textColor)),
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
               child: Container(
-                color: Colors.white,
+                color: _backgroundDark,
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
                     chartData.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Text(
-                                'No transaction data available for summary.'))
+                                'No transaction data available for summary.',
+                                style: TextStyle(color: _textColor)))
                         : SizedBox(
                             height: 200,
                             child: Container(
@@ -127,7 +166,7 @@ class BudgetSummaryScreen extends StatelessWidget {
                                             )),
                                     color: ColorEncode(
                                         variable: 'category',
-                                        values: Defaults.colors10),
+                                        values: _chartColors),
                                     modifiers: [StackModifier()],
                                   )
                                 ],
@@ -140,13 +179,14 @@ class BudgetSummaryScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                    const Divider(),
+                    Divider(color: _secondaryColor),
                     Expanded(
                       child: ListView(
                         children: insightListTiles.isEmpty
                             ? [
-                                const Center(
-                                    child: Text('No spending details.'))
+                                Center(
+                                    child: Text('No spending details.',
+                                        style: TextStyle(color: _textColor)))
                               ]
                             : insightListTiles,
                       ),
