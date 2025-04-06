@@ -15,6 +15,7 @@ class AddTransaction extends StatefulWidget {
   final String? initialNotes;
   final DateTime? initialDate;
   final String? initialTransactionType;
+  final String? initialCategory;
 
   const AddTransaction({
     super.key,
@@ -22,6 +23,7 @@ class AddTransaction extends StatefulWidget {
     this.initialNotes,
     this.initialDate,
     this.initialTransactionType,
+    this.initialCategory,
   });
 
   @override
@@ -53,8 +55,10 @@ class _AddTransactionState extends State<AddTransaction> {
     }
     if (widget.initialNotes != null) {
       notesController.text = widget.initialNotes!;
-      // Attempt to automatically generate the category based on notes
-      _autoGenerateCategory(widget.initialNotes!);
+      // Only auto-generate category if no initialCategory was provided
+      if (widget.initialCategory == null) {
+        _autoGenerateCategory(widget.initialNotes!);
+      }
     }
     // Initialize date if provided
     if (widget.initialDate != null) {
@@ -63,6 +67,10 @@ class _AddTransactionState extends State<AddTransaction> {
     // Initialize transaction type if provided
     if (widget.initialTransactionType != null) {
       transactionType = widget.initialTransactionType!;
+    }
+    // Initialize category if provided
+    if (widget.initialCategory != null) {
+      selectedCategory = widget.initialCategory;
     }
   }
 
@@ -304,24 +312,75 @@ class _AddTransactionState extends State<AddTransaction> {
                     return;
                   }
 
-                  final trans = Trans.withType(
-                    transName: notes,
-                    transactionDate: date,
-                    amount: amount,
-                    transType: transType,
-                  );
+                  // Check if we're in edit mode (all initial values were provided)
+                  bool isEditMode = widget.initialAmount != null &&
+                      widget.initialNotes != null &&
+                      widget.initialDate != null &&
+                      widget.initialCategory != null;
 
-                  trans.saveToDB(); // inserts into SQLite
-                  TransList().addTransaction(trans); // add to in-memory session
-                  trans.voteCategory(); // Vote for the category in Firestore
+                  final transactionsList = TransList();
+
+                  if (isEditMode) {
+                    // Find and update the existing transaction
+                    for (int i = 0;
+                        i < transactionsList.transactions.length;
+                        i++) {
+                      final existingTrans = transactionsList.transactions[i];
+                      // Check if this is the same transaction we're editing
+                      if (existingTrans.transName == widget.initialNotes &&
+                          existingTrans.transactionDate == widget.initialDate &&
+                          existingTrans.amount.toStringAsFixed(2) ==
+                              widget.initialAmount) {
+                        // Replace with updated transaction
+                        final updatedTrans = Trans.withType(
+                          transName: notes,
+                          transactionDate: date,
+                          amount: amount,
+                          transType: transType,
+                        );
+
+                        // Update in database using the new method
+                        updatedTrans.updateInDB(existingTrans);
+
+                        // Remove the old transaction
+                        transactionsList.removeTransaction(existingTrans);
+
+                        // Add the updated transaction
+                        transactionsList.addTransaction(updatedTrans);
+                        updatedTrans.voteCategory();
+
+                        // Exit the loop once updated
+                        break;
+                      }
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Transaction updated")),
+                    );
+                  } else {
+                    // Create new transaction
+                    final trans = Trans.withType(
+                      transName: notes,
+                      transactionDate: date,
+                      amount: amount,
+                      transType: transType,
+                    );
+
+                    trans.saveToDB(); // inserts into SQLite
+                    transactionsList
+                        .addTransaction(trans); // add to in-memory session
+                    trans.voteCategory(); // Vote for the category in Firestore
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Transaction saved")),
+                    );
+                  }
+
                   debugPrint("==== Current TransList Transactions ====");
-                  for (var t in TransList().transactions) {
+                  for (var t in transactionsList.transactions) {
                     debugPrint(t.toString());
                   }
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Transaction saved")),
-                  );
                 },
                 child: const Text(
                   'Save Transaction',

@@ -102,7 +102,49 @@ class TransactionDetailScreen extends StatelessWidget {
             const Spacer(),
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Show confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: _cardDark,
+                        title: const Text('Delete Transaction',
+                            style: TextStyle(color: _textColor)),
+                        content: const Text(
+                            'Are you sure you want to delete this transaction?',
+                            style: TextStyle(color: _textColor)),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Close dialog
+                            },
+                            child: const Text('Cancel',
+                                style: TextStyle(color: _accentColor)),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Get the transaction list
+                              final transactionsList = TransList();
+
+                              // Delete from database
+                              transaction.deleteFromDB();
+
+                              // Remove the transaction from memory
+                              transactionsList.removeTransaction(transaction);
+
+                              // Go back to home page
+                              Navigator.pop(context); // Close dialog
+                              Navigator.pop(context); // Go back to home
+                            },
+                            child: const Text('Delete',
+                                style: TextStyle(color: _errorColor)),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
                 child: const Text(
                   'Delete',
                   style: TextStyle(color: _errorColor, fontSize: 18),
@@ -136,14 +178,27 @@ class TransactionDetailScreen extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: IconButton(
               icon: const Icon(Icons.edit, color: _accentColor),
-              onPressed: () {
-                // TODO: Pass transaction data to edit screen
-                Navigator.push(
+              onPressed: () async {
+                // Pass transaction data to edit screen
+                await Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) =>
-                            const AddTransaction()) // Pass transaction later
-                    );
+                        builder: (context) => AddTransaction(
+                              initialAmount:
+                                  transaction.amount.toStringAsFixed(2),
+                              initialNotes: transaction.transName,
+                              initialDate: transaction.transactionDate,
+                              initialTransactionType:
+                                  "Withdraw", // Assuming it's a withdrawal
+                              initialCategory:
+                                  transTypeToString(transaction.transType)
+                                      .toLowerCase(),
+                            )));
+
+                // Pop back to home page to refresh the transaction list
+                if (context.mounted) {
+                  Navigator.pop(context);
+                }
               },
             ),
           )

@@ -50,6 +50,32 @@ class LocalDB {
     await db.insert('transactions', transaction);
   }
 
+  Future<void> updateTransaction(Map<String, dynamic> oldTransaction,
+      Map<String, dynamic> newTransaction) async {
+    final db = await this.db;
+
+    // Find the transaction to update by matching transaction date, name and amount
+    List<Map<String, dynamic>> matches = await db.query(
+      'transactions',
+      where: 'transName = ? AND transactionDate = ? AND amount = ?',
+      whereArgs: [
+        oldTransaction['transName'],
+        oldTransaction['transactionDate'],
+        oldTransaction['amount']
+      ],
+    );
+
+    if (matches.isNotEmpty) {
+      // Update the found transaction with new data
+      await db.update(
+        'transactions',
+        newTransaction,
+        where: 'id = ?',
+        whereArgs: [matches.first['id']],
+      );
+    }
+  }
+
   Future<List<Map<String, dynamic>>> getTransactions() async {
     final db = await this.db;
     return await db.query('transactions');
@@ -58,6 +84,19 @@ class LocalDB {
   Future<void> deleteTransactions() async {
     final db = await this.db;
     await db.delete('transactions');
+  }
+
+  Future<void> deleteTransaction(Map<String, dynamic> transaction) async {
+    final db = await this.db;
+    await db.delete(
+      'transactions',
+      where: 'transName = ? AND transactionDate = ? AND amount = ?',
+      whereArgs: [
+        transaction['transName'],
+        transaction['transactionDate'],
+        transaction['amount']
+      ],
+    );
   }
 }
 
@@ -400,6 +439,45 @@ class Trans {
       'transactionDate': transactionDate.toIso8601String(), // HELL YEAH
       'amount':
           amount, // hopefully it saves as number. if breaks, make it so that it saves as REAL
+      'transType': value,
+    });
+  }
+
+  void updateInDB(Trans oldTransaction) async {
+    // update the transaction in the local database
+    final newValue = transTypeToString(transType).toLowerCase();
+    final oldValue = transTypeToString(oldTransaction.transType).toLowerCase();
+
+    debugPrint("Updating transaction from: $oldTransaction to: $this");
+
+    final db = LocalDB();
+    await db.updateTransaction(
+        // Old transaction data
+        {
+          'transName': oldTransaction.transName,
+          'transactionDate': oldTransaction.transactionDate.toIso8601String(),
+          'amount': oldTransaction.amount,
+          'transType': oldValue,
+        },
+        // New transaction data
+        {
+          'transName': transName,
+          'transactionDate': transactionDate.toIso8601String(),
+          'amount': amount,
+          'transType': newValue,
+        });
+  }
+
+  void deleteFromDB() async {
+    // delete the transaction from the local database
+    final value = transTypeToString(transType).toLowerCase();
+    debugPrint("Deleting transaction: $this");
+
+    final db = LocalDB();
+    await db.deleteTransaction({
+      'transName': transName,
+      'transactionDate': transactionDate.toIso8601String(),
+      'amount': amount,
       'transType': value,
     });
   }
