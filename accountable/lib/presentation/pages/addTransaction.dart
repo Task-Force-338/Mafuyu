@@ -3,7 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AddTransaction extends StatefulWidget {
-  const AddTransaction({super.key});
+  final String? initialAmount;
+  final String? initialNotes;
+
+  const AddTransaction({
+    super.key,
+    this.initialAmount,
+    this.initialNotes,
+  });
 
   @override
   State<AddTransaction> createState() => _AddTransactionState();
@@ -24,6 +31,18 @@ class _AddTransactionState extends State<AddTransaction> {
     'leisure',
     'other'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with passed data if available
+    if (widget.initialAmount != null) {
+      amountController.text = widget.initialAmount!;
+    }
+    if (widget.initialNotes != null) {
+      notesController.text = widget.initialNotes!;
+    }
+  }
 
   @override
   void dispose() {
@@ -222,7 +241,6 @@ class _AddTransactionState extends State<AddTransaction> {
                     transactionDate: date,
                     amount: amount,
                     transType: transType,
-                    
                   );
 
                   trans.saveToDB(); // inserts into SQLite

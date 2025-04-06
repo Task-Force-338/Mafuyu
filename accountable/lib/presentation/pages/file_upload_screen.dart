@@ -22,7 +22,7 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
   Future<void> _pickAndProcessFile() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
+        type: FileType.custom,
         allowedExtensions: ['jpg', 'png', 'jpeg'],
       );
 
@@ -36,7 +36,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
 
         print("Selected file: $filePath");
 
-        Map<String, String?> ocrData = await _ocrService.extractSlipData(filePath);
+        Map<String, String?> ocrData =
+            await _ocrService.extractSlipData(filePath);
 
         setState(() {
           _ocrResult = ocrData;
@@ -44,11 +45,16 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
         });
 
         if (_ocrResult != null) {
-          print("OCR Result: Recipient: ${_ocrResult!['recipient']}, Amount: ${_ocrResult!['amount']}");
+          print(
+              "OCR Result: Recipient: ${_ocrResult!['recipient']}, Amount: ${_ocrResult!['amount']}");
           if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Recipient: ${_ocrResult!['recipient'] ?? 'Not found'}, Amount: ${_ocrResult!['amount'] ?? 'Not found'}'),
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddTransaction(
+                  initialAmount: _ocrResult!['amount'],
+                  initialNotes: _ocrResult!['recipient'],
+                ),
               ),
             );
           }
@@ -56,7 +62,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
           print("OCR failed or returned null.");
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Failed to extract data from slip.')),
+              const SnackBar(
+                  content: Text('Failed to extract data from slip.')),
             );
           }
         }
@@ -93,7 +100,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               decoration: BoxDecoration(
                 color: Colors.blueGrey.shade700,
                 borderRadius: BorderRadius.circular(10),
@@ -128,7 +136,8 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
               onPressed: _isProcessing ? null : _pickAndProcessFile,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueGrey.shade600,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -169,10 +178,17 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
             ElevatedButton(
               onPressed: () {
                 print("Manual transaction button pressed");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddTransaction(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey.shade500,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
