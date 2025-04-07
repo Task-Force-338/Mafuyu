@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-// Mafuyu Theme Colors
-const Color _primaryColor = Color(0xFF6A5E7A);
-const Color _secondaryColor = Color(0xFF888888);
-const Color _accentColor = Color(0xFF9B8EB8);
-const Color _textColor = Color(0xFFE0E0E0);
-const Color _backgroundDark = Color(0xFF2D2B35);
+// Updated Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF7A6B8D);
+const Color _secondaryColor = Color(0xFF9B8EB8);
+const Color _accentColor = Color(0xFFAEA0CC);
+const Color _textColor = Color(0xFFF0F0F0);
+const Color _backgroundDark = Color(0xFF2A2832);
 const Color _cardDark = Color(0xFF3A364A);
 
 class HomePage extends StatefulWidget {
@@ -136,12 +136,29 @@ class _HomePageState extends State<HomePage> {
                   });
                 }
               },
-              child: Text(
-                '${getMonthName(selectedDate.month)} ${selectedDate.year}',
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _textColor),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${getMonthName(selectedDate.month)} ${selectedDate.year}',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: _textColor,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Icon(Icons.calendar_today,
+                        size: 16, color: _textColor),
+                  ],
+                ),
               ),
             ),
             IconButton(
@@ -174,28 +191,83 @@ class _HomePageState extends State<HomePage> {
               .toStringAsFixed(2);
 
           return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   const SizedBox(height: 16),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: _primaryColor,
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        colors: [_primaryColor, _primaryColor.withOpacity(0.8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: _primaryColor.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      'Monthly Total: $totalExpense',
-                      style: const TextStyle(fontSize: 24, color: _textColor),
-                      textAlign: TextAlign.center,
+                    child: Column(
+                      children: [
+                        const Text(
+                          'Monthly Total',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _textColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '$totalExpense',
+                          style: const TextStyle(
+                            fontSize: 28,
+                            color: _textColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   if (allDailyTrans.isEmpty)
-                    const Center(
-                        child: Text("No transactions for this month.",
-                            style: TextStyle(color: Color(0xFFBBBBBB))))
+                    Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.receipt_long,
+                            size: 64,
+                            color: Color(0xFF9B8EB8),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "No transactions for this month.",
+                            style: TextStyle(
+                              color: Color(0xFFBBBBBB),
+                              fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              // Navigate to Add Transaction screen
+                              context.go('/UploadPage');
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text("Add Transaction"),
+                          ),
+                        ],
+                      ),
+                    )
                   else
                     ...allDailyTrans.map((dailyList) {
                       final dayTotal = dailyList.transactions
@@ -241,7 +313,14 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _cardDark,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,18 +328,43 @@ class _HomePageState extends State<HomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                day,
-                style: const TextStyle(fontSize: 16, color: _textColor),
-              ),
-              Row(
-                children: [
-                  const Icon(Icons.arrow_upward, size: 16, color: _textColor),
-                  Text(
-                    'Expense $totalExpense',
-                    style: const TextStyle(fontSize: 14, color: _textColor),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _primaryColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  day,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: _textColor,
                   ),
-                ],
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _accentColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.arrow_upward, size: 14, color: _textColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      '$totalExpense',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: _textColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -286,29 +390,57 @@ class _HomePageState extends State<HomePage> {
         }
       },
       child: Container(
-        margin: const EdgeInsets.fromLTRB(40, 0, 0, 20),
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 25),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _primaryColor,
-          borderRadius: BorderRadius.circular(8),
+          color: _primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: _primaryColor.withOpacity(0.1),
+            width: 1,
+          ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: _textColor),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: _accentColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: _accentColor, size: 22),
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title,
-                      style: const TextStyle(fontSize: 16, color: _textColor)),
-                  Text(subtitle,
-                      style: const TextStyle(fontSize: 14, color: _textColor)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: _textColor,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: _textColor.withOpacity(0.7),
+                    ),
+                  ),
                 ],
               ),
             ),
-            Text(amount,
-                style: const TextStyle(fontSize: 16, color: _textColor)),
+            Text(
+              '$amount',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: _textColor,
+              ),
+            ),
           ],
         ),
       ),

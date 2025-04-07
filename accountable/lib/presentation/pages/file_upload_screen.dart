@@ -6,12 +6,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:accountable/services/ocr_service.dart';
 import 'dart:io';
 
-// Mafuyu Theme Colors
-const Color _primaryColor = Color(0xFF6A5E7A);
-const Color _secondaryColor = Color(0xFF888888);
-const Color _accentColor = Color(0xFF9B8EB8);
-const Color _textColor = Color(0xFFE0E0E0);
-const Color _backgroundDark = Color(0xFF2D2B35);
+// Updated Mafuyu Theme Colors
+const Color _primaryColor = Color(0xFF7A6B8D);
+const Color _secondaryColor = Color(0xFF9B8EB8);
+const Color _accentColor = Color(0xFFAEA0CC);
+const Color _textColor = Color(0xFFF0F0F0);
+const Color _backgroundDark = Color(0xFF2A2832);
 const Color _cardDark = Color(0xFF3A364A);
 const Color _cardLightDark = Color(0xFF4A4758);
 
@@ -103,25 +103,47 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
         backgroundColor: _primaryColor,
         title: const Text('Upload E-Slip', style: TextStyle(color: _textColor)),
         centerTitle: true,
+        elevation: 4,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
               decoration: BoxDecoration(
                 color: _cardDark,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Automatic Upload',
-                    style: TextStyle(color: _textColor, fontSize: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        color: _accentColor,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Automatic Upload',
+                        style: TextStyle(
+                          color: _textColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                   Switch(
                     value: isAutomaticUpload,
@@ -136,124 +158,170 @@ class _FileUploadScreenState extends State<FileUploadScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
 
             // Upload options tabs
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.receipt_long, color: _textColor),
-                  label:
-                      const Text('E-Slip', style: TextStyle(color: _textColor)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _primaryColor,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: _cardDark.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
-                  onPressed: () {
-                    // We're already on this screen
-                  },
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.credit_card, color: _textColor),
-                  label: const Text(
-                    'Credit Card\nStatement',
-                    style: TextStyle(color: _textColor),
-                    textAlign: TextAlign.center,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _cardLightDark,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 12),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CreditCardStatementScreen(),
+                ],
+              ),
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.receipt_long, color: _textColor),
+                      label: const Text(
+                        'E-Slip',
+                        style: TextStyle(
+                          color: _textColor,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
-                    );
-                  },
-                ),
-              ],
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _primaryColor,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        // We're already on this screen
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.credit_card, color: _textColor),
+                      label: const Text(
+                        'Credit Card',
+                        style: TextStyle(
+                          color: _textColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _cardLightDark,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const CreditCardStatementScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 30),
-            const Icon(
-              Icons.cloud_upload,
-              color: _accentColor,
-              size: 80,
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _isProcessing ? null : _pickAndProcessFile,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _primaryColor,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: _isProcessing
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        color: _textColor,
-                        strokeWidth: 2,
+            const SizedBox(height: 40),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(30),
+                    decoration: BoxDecoration(
+                      color: _primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: _accentColor.withOpacity(0.3),
+                        width: 2,
                       ),
-                    )
-                  : const Text(
-                      'SELECT FILE',
-                      style: TextStyle(color: _textColor, fontSize: 16),
                     ),
-            ),
-            if (_selectedFilePath != null) ...[
-              const SizedBox(height: 20),
-              Text(
-                'Selected: ${_selectedFilePath!.split(Platform.pathSeparator).last}',
-                style: const TextStyle(color: Colors.white70),
-              ),
-            ],
-            if (_ocrResult != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                'Recipient: ${_ocrResult!['recipient'] ?? 'N/A'}',
-                style: const TextStyle(color: Colors.white),
-              ),
-              Text(
-                'Amount: ${_ocrResult!['amount'] ?? 'N/A'}',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                print("Manual transaction button pressed");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddTransaction(),
+                    child: Icon(
+                      Icons.cloud_upload,
+                      color: _accentColor,
+                      size: 80,
+                    ),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey.shade500,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Add a transaction manually',
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: _isProcessing ? null : _pickAndProcessFile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _primaryColor,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      elevation: 6,
+                      shadowColor: _primaryColor.withOpacity(0.5),
+                    ),
+                    child: _isProcessing
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: _textColor,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Processing...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _textColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.file_upload, color: _textColor),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Upload File',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: _textColor,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Upload your E-Slip to automatically extract transaction information',
+                    style: TextStyle(
+                      color: _textColor.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
